@@ -70,7 +70,7 @@ footer{
     overflow: hidden;
     margin-right: -50%;
     left: 48%;
-    width: 12ch;
+    width: 20ch;
 }
 
 @keyframes rev_animation{
