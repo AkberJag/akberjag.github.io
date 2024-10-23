@@ -6,10 +6,10 @@
       "component": "HomeSection",
       "content": {
         "greeting": "Hey there!",
-        "name": "John Doe",
+        "name": "Akber Jagannath",
         "secondaryName": "VU3CXF",
-        "title": "Web Developer & Designer",
-        "subtitle": "Ham Radio Enthusiast"
+        "title": "Your friendly neighborhood Python developer 🐍",
+        "subtitle": "and an Amateur radio operator 📡"
       }
     },
     {
@@ -27,34 +27,16 @@
       "component": "ProjectsSection",
       "content": [
         {
-          "title": "Project 1",
-          "description": "A Vue.js web application for task management.",
-          "link": "#",
-          "technologies": ["Vue.js", "Vuex", "Tailwind CSS", "Firebase"]
+          "title": "Block Buster",
+          "description": "A puzzle game made using the Godot Game engine",
+          "link": "https://play.google.com/store/apps/details?id=com.weegames.blockbuster",
+          "technologies": ["Godot", "GDScript", "Android"]
         },
         {
-          "title": "Project 2",
-          "description": "An e-commerce platform built with Vue and Node.js.",
-          "link": "#",
-          "technologies": ["Vue.js", "Node.js", "Express", "MongoDB"]
-        },
-        {
-          "title": "Project 3",
-          "description": "A responsive portfolio website using Vue and Tailwind CSS.",
-          "link": "#",
-          "technologies": ["Vue.js", "Tailwind CSS", "Vite"]
-        },
-        {
-          "title": "Project 4",
-          "description": "A real-time chat application with Vue and Firebase.",
-          "link": "#",
-          "technologies": ["Vue.js", "Firebase", "Vuex", "Vue Router"]
-        },
-        {
-          "title": "Project 5",
-          "description": "Another real-time chat application with Vue and Firebase.",
-          "link": "#",
-          "technologies": ["Vue.js", "Firebase", "Vuex", "Vue Router"]
+          "title": "Portfolio Template",
+          "description": "A modern, fully customizable, modular portfolio website template built using Vue.js and Tailwind CSS.",
+          "link": "https://github.com/AkberJag/portfolio-template",
+          "technologies": ["Vue.js", "Tailwind CSS", "PrimeVue 4"]
         }
       ]
     },
