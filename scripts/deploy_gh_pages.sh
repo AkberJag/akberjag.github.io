@@ -1,6 +1,30 @@
 #!/bin/bash
 # Build and deploy script for publishing frontend dist folder to GitHub Pages
-# Exit on error
+#
+# This script automates the process of building a frontend project and deploying
+# the `dist` folder to the `gh-pages` branch on GitHub for hosting via GitHub Pages.
+#
+# Key Steps:
+# 1. Verifies that the script is run from the project root and checks for the `frontend` directory.
+# 2. Navigates to the `frontend` directory and checks for `package.json` to ensure it's a Node.js project.
+# 3. Installs dependencies (if not already installed), then builds the project using `npm run build`.
+# 4. Checks if the build was successful by verifying the existence of the `dist` folder.
+# 5. Commits the new build, adds the `dist` folder to Git, and pushes it to the `gh-pages` branch using `git subtree`.
+# 6. Pushes the latest changes to the current branch of the repository.
+#
+# Exit on any error to prevent partial or broken deployment.
+# Includes helpful error messages and logs for troubleshooting.
+#
+# How to run this script:
+# 1. Ensure you're in the project root directory.
+# 2. Run the following command in the terminal:
+#    bash scripts/deploy_gh_pages.sh
+#
+# This assumes the script is located in the `scripts/` folder. If it’s located elsewhere,
+# adjust the path accordingly when running the script.
+#
+
+
 set -e
 
 echo "🚀 Starting build and deployment process..."
