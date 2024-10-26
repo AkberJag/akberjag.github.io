@@ -3,10 +3,10 @@ import { ref, onMounted, onUnmounted, computed, inject } from 'vue'
 
 const data = {
     "greeting": "Hey there!",
-    "name": "John Doe",
+    "name": "Akber Jagannath",
     "secondaryName": "VU3CXF",
-    "title": "Web Developer & Designer",
-    "subtitle": "Ham Radio Enthusiast"
+    "title": "Your friendly neighborhood Python developer 🐍",
+    "subtitle": "and an Amateur radio operator 📡"
 }
 
 const sections = inject('sections')

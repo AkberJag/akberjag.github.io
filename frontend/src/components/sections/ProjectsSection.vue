@@ -5,34 +5,28 @@ import Carousel from '../TheCarousel.vue';
 
 const data = [
     {
-        "title": "Project 1",
-        "description": "A Vue.js web application for task management.",
-        "link": "#",
-        "technologies": ["Vue.js", "Vuex", "Tailwind CSS", "Firebase"]
+        "title": "Block Buster",
+        "description": "A puzzle game made using the Godot Game engine",
+        "link": "https://play.google.com/store/apps/details?id=com.weegames.blockbuster",
+        "technologies": ["Godot", "GDScript", "Android"]
     },
     {
-        "title": "Project 2",
-        "description": "An e-commerce platform built with Vue and Node.js.",
-        "link": "#",
-        "technologies": ["Vue.js", "Node.js", "Express", "MongoDB"]
+        "title": "Portfolio Template",
+        "description": "A modern, fully customizable, modular portfolio website template built using Vue.js and Tailwind CSS.",
+        "link": "https://github.com/AkberJag/portfolio-template",
+        "technologies": ["Vue.js", "Tailwind CSS", "PrimeVue 4"]
     },
     {
-        "title": "Project 3",
-        "description": "A responsive portfolio website using Vue and Tailwind CSS.",
-        "link": "#",
-        "technologies": ["Vue.js", "Tailwind CSS", "Vite"]
+        "title": "openPizza 🍕",
+        "description": "A POS webapp made using FastAPI and Vue",
+        "link": "https://github.com/AkberJag/openPizza",
+        "technologies": ["FastAPI", "Vue.js", "PrimeVue 4"]
     },
     {
-        "title": "Project 4",
-        "description": "A real-time chat application with Vue and Firebase.",
-        "link": "#",
-        "technologies": ["Vue.js", "Firebase", "Vuex", "Vue Router"]
-    },
-    {
-        "title": "Project 5",
-        "description": "Another real-time chat application with Vue and Firebase.",
-        "link": "#",
-        "technologies": ["Vue.js", "Firebase", "Vuex", "Vue Router"]
+        "title": "MilkyBot 🤖",
+        "description": "An open-source, free-to-use Telegram Bot designed to make sharing sales and purchase details a breeze.",
+        "link": "https://github.com/AkberJag/openPizza",
+        "technologies": ["Python", "SQLite", "AWS-EC2", "AWS-Lambda"]
     }
 ]
 

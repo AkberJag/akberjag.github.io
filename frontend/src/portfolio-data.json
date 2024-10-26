@@ -4,25 +4,25 @@
       "name": "Home",
       "path": "home",
       "component": "HomeSection",
-      "pageTitle": "John Doe | Web Developer & Designer"
+      "pageTitle": "Akber Jagannath | Python Developer"
     },
     {
       "name": "About",
       "path": "about",
       "component": "AboutSection",
-      "pageTitle": "About Me | John Doe"
+      "pageTitle": "About Me | Akber Jagannath"
     },
     {
       "name": "Projects",
       "path": "projects",
       "component": "ProjectsSection",
-      "pageTitle": "Projects | John Doe"
+      "pageTitle": "Projects | Akber Jagannath"
     },
     {
       "name": "Contact",
       "path": "contacts",
       "component": "ContactSection",
-      "pageTitle": "Contact Me | John Doe"
+      "pageTitle": "Contact Me | Akber Jagannath"
     }
   ]
 }
