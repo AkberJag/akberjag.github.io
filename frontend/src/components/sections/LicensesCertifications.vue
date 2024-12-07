@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import awsCFLImage from '@/assets/images/aws-certified-cloud-practitioner.png'
-import awsDAImage from '@/assets/images/aws-certified-associate.png'
 import radioImage from '@/assets/images/radio.png'
 import Carousel from '../TheCarousel.vue'
 
@@ -11,15 +10,7 @@ const featuredCertifications = ref([
         image: awsCFLImage,
         alt: "AWS Cloud Practitioner Certification Badge",
         details: "Validates overall understanding of the AWS Cloud",
-        verifyLink: "https://aws.amazon.com/verification",
-        featured: true
-    },
-    {
-        title: "AWS Certified Developer - Associate",
-        image: awsDAImage,
-        alt: "AWS Developer Associate Certification Badge",
-        details: "Design, develop, and manage robust, secure, scalable, highly available, and dynamic solutions to drive business objectives",
-        verifyLink: "https://aws.amazon.com/verification",
+        verifyLink: "https://www.credly.com/badges/a9d5e2c0-2b81-4018-9254-d53f15d8e4f4/public_url",
         featured: true
     },
     {
@@ -32,42 +23,7 @@ const featuredCertifications = ref([
 ])
 
 const otherCertifications = ref([
-    {
-        title: "React Developer",
-        image: "/react-certification.png",
-        alt: "React Developer Certification",
-        featured: false
-    },
-    {
-        title: "Vue.js Developer",
-        image: "/vue-certification.png",
-        alt: "Vue.js Developer Certification",
-        featured: false
-    },
-    {
-        title: "TypeScript",
-        image: "/typescript-certification.png",
-        alt: "TypeScript Certification",
-        featured: false
-    },
-    {
-        title: "Node.js",
-        image: "/nodejs-certification.png",
-        alt: "Node.js Developer Certification",
-        featured: false
-    },
-    {
-        title: "MongoDB",
-        image: "/mongodb-certification.png",
-        alt: "MongoDB Certification",
-        featured: false
-    },
-    {
-        title: "Docker",
-        image: "/docker-certification.png",
-        alt: "Docker Certification",
-        featured: false
-    }
+
 ])
 
 const allCertifications = computed(() => [...featuredCertifications.value, ...otherCertifications.value])
