@@ -1,25 +1,32 @@
 ---
-# https://vitepress.dev/reference/default-theme-home-page
 layout: home
-
 hero:
-  name: "docs"
-  text: "A VitePress Site"
-  tagline: My great project tagline
+  name: 'Hi There 👋'
+  text: 'Welcome to My Programming Playground! 🚀'
+  tagline: Documenting my adventures in Python, Go, and beyond
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
-    - theme: alt
-      text: API Examples
-      link: /api-examples
-
+      text: View on Github
+      link: https://github.com/AkberJag/akberjag.github.io/
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - icon: 🐍
+    title: Python Development
+    details: Exploring Python's versatility through practical projects, data structures, algorithms, and real-world applications.
+    link: /python/
+  - icon: 🔵
+    title: Go Programming
+    details: Learning Go's concurrent programming model, strong typing, and building efficient backend services.
+    link: /golang/
+  - icon: 🐳
+    title: Docker
+    details: Learning containerization, building efficient Docker images, and managing multi-container applications with Docker Compose.
+    link: /docker/
+  - icon: 📚
+    title: Best Practices
+    details: Documenting coding standards, design patterns, and lessons learned throughout the learning process.
+    link: /best-practices/
+  - icon: 💻
+    title: Project Showcase
+    details: A collection of projects built while mastering different programming languages and concepts.
+    link: /projects/
 ---
-
