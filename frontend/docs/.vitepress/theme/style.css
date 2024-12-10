@@ -7,7 +7,7 @@
   --vp-c-text-soft: #4e5969;
   --vp-c-border: rgba(0, 0, 0, 0.1);
   --vp-c-brand: #3a86ff;
-  --vp-c-brand-light: #ff006e;
+  --vp-c-brand-light: #4caf50;
 
   /* Hero section variables */
   --vp-home-hero-name-background: linear-gradient(
@@ -54,13 +54,12 @@ body {
   background: linear-gradient(
     135deg,
     rgba(58, 134, 255, 0.2) 0%,
-    rgba(255, 0, 110, 0.2) 50%,
+    rgba(76, 175, 80, 0.2) 50%,
     rgba(58, 134, 255, 0.2) 100%
   );
   mask-image: radial-gradient(circle at center, black, transparent 80%);
   z-index: 0;
   opacity: 0.8;
-  animation: gradientShift 20s ease-in-out infinite alternate;
   pointer-events: none;
 }
 
@@ -75,7 +74,7 @@ body {
   background: var(--vp-c-bg-soft) !important;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid var(--vp-c-border) !important;
+  border: 1px solid transparent !important;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -103,6 +102,7 @@ body {
 .VPFeature:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  border-color: var(--vp-c-brand) !important;
 }
 
 .VPFeature:hover::before {
@@ -117,19 +117,6 @@ body {
   -webkit-backdrop-filter: blur(15px);
   z-index: 2;
   border-top: 1px solid var(--vp-c-border);
-}
-
-/* Animation */
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
 }
 
 /* Responsive design */
@@ -152,6 +139,7 @@ body {
 
   .VPFeature:hover {
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+    border-color: var(--vp-c-brand) !important;
   }
 
   .VPContent::before {
@@ -160,12 +148,13 @@ body {
 
   .VPButton.brand {
     border-color: var(--vp-c-brand);
+    background-color: transparent;
     color: var(--vp-c-brand);
     transition: all 0.3s ease;
 
     &:hover {
       background-color: var(--vp-c-brand);
-      color: var(--vp-background-color);
+      color: #ffffff;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
     }
