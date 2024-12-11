@@ -115,3 +115,7 @@
 .VPNavBarTitle.has-sidebar .title {
   border: none;
 }
+
+.VPNavBarTitle{
+  display: none;
+}
