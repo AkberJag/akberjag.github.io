@@ -59,5 +59,10 @@ export default defineConfig({
         timeStyle: 'short',
       },
     },
+    editLink: {
+      text: 'Edit this page on GitHub',
+      pattern:
+        'https://github.com/AkberJag/akberjag.github.io/edit/main/frontend/docs/:path',
+    },
   },
 })

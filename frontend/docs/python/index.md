@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # 🐍 My Python Adventure: A Not-So-Serious Guide to Serious Programming
 
 Hey there, fellow coder! 👋
