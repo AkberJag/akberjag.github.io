@@ -30,3 +30,5 @@ coverage
 *.tsbuildinfo
 
 cache/
+
+deploy_tmp/
