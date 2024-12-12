@@ -1,9 +1,5 @@
 #!/bin/bash
 # Build and deploy script for publishing both Vue app and VitePress docs to GitHub Pages
-#
-# This script should be located in the scripts/ directory of your project.
-# To run: bash scripts/deploy.sh from the project root
-#
 set -e
 
 # Get the directory where the script is located
@@ -58,8 +54,6 @@ fi
 
 # Build VitePress docs
 echo "📚 Building VitePress documentation..."
-
-# Build the docs using the npm script from the same package.json
 echo "🔨 Building the documentation..."
 npm run docs:build
 
@@ -90,12 +84,25 @@ echo "📦 Publishing to gh-pages branch..."
 # Get the current git branch
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-# Push the subtree
+# Try to push normally first
+echo "Attempting normal push..."
 if git subtree push --prefix deploy_tmp origin gh-pages; then
     echo "✅ Successfully deployed to GitHub Pages!"
 else
-    echo "❌ Deployment failed. If you get a 'updates were rejected' error, try running:"
-    echo "git push origin `git subtree split --prefix deploy_tmp $current_branch`:gh-pages --force"
+    echo "Normal push failed, attempting force push..."
+    # Split the subtree into a temporary branch
+    git subtree split --prefix deploy_tmp -b temp_deploy
+    
+    # Force push the temporary branch to gh-pages
+    if git push -f origin temp_deploy:gh-pages; then
+        echo "✅ Successfully force deployed to GitHub Pages!"
+    else
+        echo "❌ Force deployment failed"
+        exit 1
+    fi
+    
+    # Clean up the temporary branch
+    git branch -D temp_deploy
 fi
 
 # Push changes to remote
