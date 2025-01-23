@@ -35,6 +35,44 @@ export default defineConfig({
               ],
             },
             { text: 'Advanced Topics', link: '/python/advanced' },
+            {
+              text: '🧪 Introduction to TDD & Pytest',
+              collapsed: true,
+              items: [
+                {
+                  text: 'Lets start!',
+                  link: '/python/TDD/lets_start',
+                },
+                {
+                  text: 'Key Concepts in TDD',
+                  link: '/python/TDD/key_concepts',
+                },
+                {
+                  text: 'Pytest Basics',
+                  link: '/python/TDD/pytest_basics',
+                },
+                {
+                  text: 'Fixtures',
+                  link: '/python/TDD/fixtures',
+                },
+                {
+                  text: 'Parameterized Tests',
+                  link: '/python/TDD/parameterized_tests',
+                },
+                {
+                  text: 'Mocking & Monkeypatching',
+                  link: '/python/TDD/mocking_monkeypatch',
+                },
+                {
+                  text: 'Integration and E2E Tests',
+                  link: '/python/TDD/integration_e2e',
+                },
+                {
+                  text: 'The Testing Pyramid',
+                  link: '/python/TDD/the_testing_pyramid',
+                },
+              ],
+            },
           ],
         },
       ],
@@ -50,9 +88,6 @@ export default defineConfig({
         },
       ],
     },
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
-    ],
     lastUpdated: {
       formatOptions: {
         dateStyle: 'medium',
