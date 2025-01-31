@@ -24,13 +24,29 @@ export default defineConfig({
                   text: 'Before we begin',
                   link: '/python/basics/before_we_begin',
                 },
-                { text: 'Variables', link: '/python/basics/variables' },
-                { text: 'Data Types', link: '/python/basics/data-types' },
-                { text: 'Control Flow', link: '/python/basics/control-flow' },
-                { text: 'Functions', link: '/python/basics/functions' },
                 {
-                  text: 'Error Handling',
-                  link: '/python/basics/error-handling',
+                  text: 'The Building Blocks',
+                  link: '/python/basics/building_blocks',
+                },
+                {
+                  text: 'The Essentials of Python ',
+                  link: '/python/basics/the_essentials_of_python',
+                },
+                {
+                  text: 'Control Flow and Loops',
+                  link: '/python/basics/control_flow_and_loops',
+                },
+                {
+                  text: 'Data Structures',
+                  link: '/python/basics/data_structures',
+                },
+                {
+                  text: 'Functions',
+                  link: '/python/basics/functions',
+                },
+                {
+                  text: 'How to organize python code',
+                  link: '/python/basics/code_organize',
                 },
               ],
             },
