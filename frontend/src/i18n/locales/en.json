@@ -82,7 +82,7 @@
           "description": "A POS webapp made using FastAPI and Vue"
         },
         "milkyBot": {
-          "title": "MilkyBot 🤖",
+          "title": "TeleBillBot 🤖",
           "description": "An open-source, free-to-use Telegram Bot designed to make sharing sales and purchase details a breeze."
         }
       }

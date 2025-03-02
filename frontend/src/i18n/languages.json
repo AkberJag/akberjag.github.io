@@ -3,5 +3,10 @@
     "code": "en",
     "iso": "en-US",
     "name": "English"
+  },
+  {
+    "code": "ml",
+    "iso": "ml-IN",
+    "name": "മലയാളം"
   }
 ]
