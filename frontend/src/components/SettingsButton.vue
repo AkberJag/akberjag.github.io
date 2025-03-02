@@ -51,13 +51,12 @@ onUnmounted(() => {
             <div>
               <ScrollBarToggle />
             </div>
-
             <div>
               <LanguageSwitcher />
             </div>
           </div>
           <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400">
-            Customize your experience
+            {{ $t('settings.customize.label') }}
           </div>
         </div>
       </Transition>
