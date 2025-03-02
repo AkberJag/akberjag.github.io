@@ -1,5 +1,9 @@
 <script setup>
 import { Mail } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 const data = {
   "email": "akberjag@gmail.com",
   "socialLinks": [
@@ -28,15 +32,15 @@ const openEmailClient = () => {
     <div class="w-full max-w-md px-4 text-center">
       <h2
         class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6 transition-colors duration-200">
-        Contact Me
+        {{ t('sections.contact.name') }}
       </h2>
-      <p class="text-gray-700 dark:text-gray-200 mb-6 transition-colors duration-200">Feel free to reach out to me via
-        email or connect on social media!
+      <p class="text-gray-700 dark:text-gray-200 mb-6 transition-colors duration-200">
+        {{ t('sections.contact.description') }}
       </p>
       <button v-if="data.email" @click="openEmailClient"
         class="bg-primary text-white hover:bg-primary-400 font-semibold py-2 px-4 rounded-md transition-all duration-300 text-sm md:text-base flex items-center justify-center mx-auto mb-6 shadow-lg hover:shadow-xl ease-in-out transform hover:-translate-y-1 bg-gradient-to-bl from-primary-400 to-primary-600 hover:from-primary-500 hover:to-primary-700 dark:from-primary-500 dark:to-primary-700 dark:hover:from-primary-600 dark:hover:to-primary-800 focus:ring-2 focus:ring-primary-300 dark:focus:ring-primary-600 focus:outline-none">
         <Mail class="size-5 mr-2" />
-        Send me an email
+        {{ t('sections.contact.emailButton') }}
       </button>
       <div class="flex justify-center space-x-4">
         <a v-for="link in data.socialLinks" :key="link.name" :href="link.url" target="_blank" rel="noopener noreferrer"

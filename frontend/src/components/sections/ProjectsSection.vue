@@ -1,34 +1,37 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Carousel from '../TheCarousel.vue';
 
+const { t } = useI18n();
 
-const data = [
+// Fixed data array - keeping the original technology arrays
+const data = computed(() => [
   {
-    "title": "Block Buster",
-    "description": "A puzzle game made using the Godot Game engine",
+    "title": t('sections.projects.items.blockBuster.title'),
+    "description": t('sections.projects.items.blockBuster.description'),
     "link": "https://play.google.com/store/apps/details?id=com.weegames.blockbuster",
     "technologies": ["Godot", "GDScript", "Android"]
   },
   {
-    "title": "Portfolio Template",
-    "description": "A modern, fully customizable, modular portfolio website template built using Vue.js and Tailwind CSS.",
+    "title": t('sections.projects.items.portfolioTemplate.title'),
+    "description": t('sections.projects.items.portfolioTemplate.description'),
     "link": "https://github.com/AkberJag/portfolio-template",
     "technologies": ["Vue.js", "Tailwind CSS", "PrimeVue 4"]
   },
   {
-    "title": "openPizza 🍕",
-    "description": "A POS webapp made using FastAPI and Vue",
+    "title": t('sections.projects.items.openPizza.title'),
+    "description": t('sections.projects.items.openPizza.description'),
     "link": "https://github.com/AkberJag/openPizza",
     "technologies": ["FastAPI", "Vue.js", "PrimeVue 4"]
   },
   {
-    "title": "MilkyBot 🤖",
-    "description": "An open-source, free-to-use Telegram Bot designed to make sharing sales and purchase details a breeze.",
+    "title": t('sections.projects.items.milkyBot.title'),
+    "description": t('sections.projects.items.milkyBot.description'),
     "link": "https://github.com/AkberJag/openPizza",
     "technologies": ["Python", "SQLite", "AWS-EC2", "AWS-Lambda"]
   }
-]
+]);
 
 const responsiveOptions = ref([
   {
@@ -52,8 +55,9 @@ const responsiveOptions = ref([
 <template>
   <div class="flex items-center justify-center min-h-screen">
     <div class="min-w-0 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-xl sm:text-2xl font-bold dark:text-white text-gray-900 mb-4 sm:mb-6 text-center">My
-        Projects</h2>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+        {{ t('sections.projects.name') }}
+      </h2>
 
       <!-- Mobile Carousel: One item visible -->
       <Carousel v-if="data.length > 2" :items="data" :numVisible="1" :numScroll="1" circular
@@ -76,7 +80,7 @@ const responsiveOptions = ref([
                 </div>
                 <a :href="slotProps.data.link" target="_blank" rel="noopener noreferrer"
                   class="text-blue-500 hover:underline text-xs inline-block">
-                  View Project
+                  {{ t('sections.projects.viewButton') }}
                 </a>
               </div>
             </div>
@@ -105,7 +109,7 @@ const responsiveOptions = ref([
                 </div>
                 <a :href="slotProps.data.link" target="_blank" rel="noopener noreferrer"
                   class="text-blue-500 hover:underline text-sm inline-block">
-                  View Project
+                  {{ t('sections.projects.viewButton') }}
                 </a>
               </div>
             </div>
@@ -134,7 +138,7 @@ const responsiveOptions = ref([
                 </div>
                 <a :href="slotProps.data.link" target="_blank" rel="noopener noreferrer"
                   class="text-blue-500 hover:underline text-sm md:text-base inline-block">
-                  View Project
+                  {{ t('sections.projects.viewButton') }}
                 </a>
               </div>
             </div>
@@ -159,7 +163,7 @@ const responsiveOptions = ref([
             </div>
             <a :href="project.link" target="_blank" rel="noopener noreferrer"
               class="text-blue-500 hover:underline text-xs sm:text-sm">
-              View Project
+              {{ t('sections.projects.viewButton') }}
             </a>
           </div>
         </div>

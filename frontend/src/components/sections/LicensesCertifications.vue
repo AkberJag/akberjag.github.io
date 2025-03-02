@@ -1,30 +1,31 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n' // Import the i18n composable
 import awsCFLImage from '@/assets/images/aws-certified-cloud-practitioner.png'
 import radioImage from '@/assets/images/radio.png'
 import Carousel from '../TheCarousel.vue'
 
+const { t } = useI18n() // Initialize i18n
+
 const featuredCertifications = ref([
   {
-    title: "AWS Cloud Practitioner",
+    title: t('sections.licensesAndCerts.featured.aws_cfl.title'),
     image: awsCFLImage,
-    alt: "AWS Cloud Practitioner Certification Badge",
-    details: "Validates overall understanding of the AWS Cloud",
+    alt: t('sections.licensesAndCerts.featured.aws_cfl.alt'),
+    details: t('sections.licensesAndCerts.featured.aws_cfl.details'),
     verifyLink: "https://www.credly.com/badges/a9d5e2c0-2b81-4018-9254-d53f15d8e4f4/public_url",
     featured: true
   },
   {
-    title: "Amateur Wireless Station license",
+    title: t('sections.licensesAndCerts.featured.radio.title'),
     image: radioImage,
-    alt: "Amateur Radio License Badge",
-    details: "Licensed amateur radio operator with expertise in wireless communications",
+    alt: t('sections.licensesAndCerts.featured.radio.alt'),
+    details: t('sections.licensesAndCerts.featured.radio.details'),
     featured: true
   }
 ])
 
-const otherCertifications = ref([
-
-])
+const otherCertifications = ref([])
 
 const allCertifications = computed(() => [...featuredCertifications.value, ...otherCertifications.value])
 const hasOtherCertifications = computed(() => otherCertifications.value.length > 0)
@@ -55,7 +56,7 @@ const responsiveOptions = ref([
   <div class="flex items-center justify-center min-h-screen">
     <section class="min-w-0 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
       <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
-        Licenses and Certifications
+        {{ $t('sections.licensesAndCerts.name') }}
       </h2>
 
       <!-- Mobile and Tablet View: Single Carousel -->
@@ -76,7 +77,7 @@ const responsiveOptions = ref([
                   <p class="text-white text-sm text-center mb-3">{{ data.details }}</p>
                   <a v-if="data.verifyLink" :href="data.verifyLink" target="_blank" rel="noopener noreferrer"
                     class="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 hover:shadow-xl ease-in-out transform hover:-translate-y-1 bg-gradient-to-bl from-primary-400 to-primary-600 hover:from-primary-500 hover:to-primary-700">
-                    Verify Certification
+                    {{ $t('sections.licensesAndCerts.verifyButton') }}
                   </a>
                 </div>
               </div>
@@ -108,7 +109,7 @@ const responsiveOptions = ref([
                 <p class="text-white text-base text-center mb-4">{{ cert.details }}</p>
                 <a v-if="cert.verifyLink" :href="cert.verifyLink" target="_blank" rel="noopener noreferrer"
                   class="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 hover:shadow-xl ease-in-out transform hover:-translate-y-1 bg-gradient-to-bl from-primary-400 to-primary-600 hover:from-primary-500 hover:to-primary-700">
-                  Verify Certification
+                  {{ $t('sections.licensesAndCerts.verifyButton') }}
                 </a>
               </div>
             </div>
@@ -118,7 +119,7 @@ const responsiveOptions = ref([
         <!-- Other Certifications -->
         <div v-if="hasOtherCertifications" class="flex flex-col items-center w-full">
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
-            Additional Certifications
+            {{ $t('sections.licensesAndCerts.additionalHeading') }}
           </h3>
           <!-- Grid for 6 or fewer items -->
           <div v-if="!shouldShowOtherCertificationsCarousel" class="flex justify-center w-full">
