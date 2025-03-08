@@ -1,0 +1,34 @@
+{
+  "sections": [
+    {
+      "key": "home",
+      "path": "home",
+      "component": "HomeSection",
+      "translationKey": "sections.home"
+    },
+    {
+      "key": "about",
+      "path": "about",
+      "component": "AboutSection",
+      "translationKey": "sections.about"
+    },
+    {
+      "key": "licensesAndCerts",
+      "path": "licenses-and-certs",
+      "component": "LicensesCertifications",
+      "translationKey": "sections.licensesAndCerts"
+    },
+    {
+      "key": "projects",
+      "path": "projects",
+      "component": "ProjectsSection",
+      "translationKey": "sections.projects"
+    },
+    {
+      "key": "contact",
+      "path": "contacts",
+      "component": "ContactSection",
+      "translationKey": "sections.contact"
+    }
+  ]
+}
