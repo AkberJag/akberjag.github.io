@@ -69,7 +69,15 @@ cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/
 
 # Switch to the gh-pages branch
 echo -e "${YELLOW}🔄 Switching to ${CYAN}$DEPLOY_BRANCH${YELLOW} branch...${NC}"
-git checkout $DEPLOY_BRANCH || git checkout -b $DEPLOY_BRANCH
+if git show-ref --verify --quiet refs/heads/$DEPLOY_BRANCH; then
+  # Branch exists, switch to it
+  git checkout $DEPLOY_BRANCH
+  # Pull latest changes to avoid conflicts
+  git pull origin $DEPLOY_BRANCH --rebase || true
+else
+  # Branch doesn't exist, create it
+  git checkout -b $DEPLOY_BRANCH
+fi
 
 # Remove existing files to avoid conflicts (but leave .git directory)
 echo -e "${RED}🗑️ Cleaning old files from ${YELLOW}$DEPLOY_BRANCH${RED}...${NC}"
@@ -98,5 +106,6 @@ git push origin $DEPLOY_BRANCH
 # Switch back to the original branch
 echo -e "${BLUE}🔄 Switching back to ${YELLOW}$CURRENT_BRANCH${BLUE} branch...${NC}"
 git checkout $CURRENT_BRANCH
+
 
 echo -e "${GREEN}✅ Deployment complete! Your site should be available soon at your GitHub Pages URL.${NC}"
