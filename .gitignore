@@ -30,4 +30,4 @@ coverage
 *.tsbuildinfo
 
 docs-dist
-dist/
+gh-pages-temp
