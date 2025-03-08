@@ -1,6 +1,4 @@
-# Create a temporary directory for our deployment files
-echo -e "${PURPLE}📁 Creating temporary directory for deployment...${NC}"
-mkdir -p $TEMP_DIR#!/bin/bash
+#!/bin/bash
 
 # Exit script if any command fails
 set -e
@@ -22,6 +20,10 @@ BUILD_DIR="$FRONTEND_DIR/dist"  # Vue build directory
 DOCS_DIR="$FRONTEND_DIR/docs"  # Documentation directory inside frontend
 DOCS_BUILD_DIR="$DOCS_DIR/.vitepress/dist"  # Vitepress build directory
 TEMP_DIR="gh-pages-tmp"
+
+# Create a temporary directory for our deployment files
+echo -e "${PURPLE}📁 Creating temporary directory for deployment...${NC}"
+mkdir -p $TEMP_DIR
 
 echo -e "${CYAN}🚀 Starting deployment process...${NC}"
 
