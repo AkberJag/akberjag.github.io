@@ -13,6 +13,7 @@
 # 6. Checks if the builds were successful by verifying the existence of the `dist` folders.
 # 7. Commits the new build, adds the `dist` folder to Git, and pushes it to the `gh-pages` branch using `git subtree`.
 # 8. Pushes the latest changes to the current branch of the repository.
+# 9. Cleans up temporary files and directories created during the process.
 #
 # Exit on any error to prevent partial or broken deployment.
 # Includes helpful error messages and logs for troubleshooting.
@@ -134,6 +135,16 @@ echo "🔄 Pushing changes to remote..."
 if ! git push origin "$current_branch"; then
     echo "❌ Error: Failed to push changes to remote"
     exit 1
+fi
+
+# Cleanup temporary files and directories
+echo "🧹 Cleaning up temporary files and directories..."
+if [ -d "frontend/docs-dist" ]; then
+    rm -rf frontend/docs-dist || { echo "⚠️ Warning: Failed to remove docs-dist directory"; }
+fi
+
+if [ -d "frontend/dist/docs" ]; then
+    rm -rf frontend/dist/docs || { echo "⚠️ Warning: Failed to remove dist/docs directory"; }
 fi
 
 echo "✨ All done! Version ${VERSION} has been deployed to GitHub Pages with documentation and pushed to remote."
