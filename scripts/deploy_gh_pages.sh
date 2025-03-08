@@ -11,8 +11,8 @@
 # 4. Builds the documentation using `npm run docs:build`.
 # 5. Builds the project using `npm run build`.
 # 6. Checks if the builds were successful by verifying the existence of the `dist` folders.
-# 7. Commits the new build, adds the `dist` folder to Git, and pushes it to the `gh-pages` branch using `git subtree`.
-# 8. Pushes the latest changes to the current branch of the repository.
+# 7. Uses `git subtree` to push the `dist` folder to the `gh-pages` branch without committing it to the current branch.
+# 8. Pushes the latest changes to the current branch of the repository (excluding the `dist` folder).
 # 9. Cleans up temporary files and directories created during the process.
 #
 # Exit on any error to prevent partial or broken deployment.
@@ -105,23 +105,13 @@ cp -r docs-dist/* dist/docs/ || { echo "❌ Error: Failed to copy docs to dist/d
 # Go back to project root
 cd .. || { echo "❌ Error: Failed to navigate back to project root"; exit 1; }
 
-# Force add and commit the new build
-echo "📝 Committing the new build..."
-if ! git add frontend/dist -f; then
-    echo "❌ Error: Failed to add dist folder to git"
-    exit 1
-fi
-
-if ! git commit -m "🚀 deploy: Deploy version ${VERSION} with docs"; then
-    echo "⚠️ Warning: No changes to commit"
-fi
-
+# Push the dist folder to the gh-pages branch using git subtree
 echo "📦 Publishing frontend/dist folder to gh-pages branch..."
 
 # Get the current git branch
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-# Push the subtree
+# Push the subtree to gh-pages
 if git subtree push --prefix frontend/dist origin gh-pages; then
     echo "✅ Successfully deployed to GitHub Pages!"
 else
@@ -130,8 +120,8 @@ else
     exit 1
 fi
 
-# Push changes to remote
-echo "🔄 Pushing changes to remote..."
+# Push changes to remote (excluding the dist folder)
+echo "🔄 Pushing changes to remote (excluding dist folder)..."
 if ! git push origin "$current_branch"; then
     echo "❌ Error: Failed to push changes to remote"
     exit 1
