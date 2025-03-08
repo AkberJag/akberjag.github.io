@@ -181,12 +181,25 @@ fi
 # Return to project root
 cd "$START_DIR" || exit 1
 
-# Switch to gh-pages branch (create if it doesn't exist)
-print_message "Switching to gh-pages branch..." "$PURPLE"
-if git show-ref --verify --quiet refs/heads/gh-pages; then
-  git checkout gh-pages
+# Detect if this is a user/organization site
+REPO_URL=$(git config --get remote.origin.url)
+REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
+USER_NAME=$(echo "$REPO_NAME" | awk -F/ '{print $1}')
+REPO_BASENAME=$(echo "$REPO_NAME" | awk -F/ '{print $2}')
+TARGET_BRANCH="gh-pages"
+
+# For user/organization GitHub Pages, we deploy to the main branch
+if [[ "$REPO_BASENAME" == "$USER_NAME.github.io" ]]; then
+  TARGET_BRANCH="main"
+  print_message "Detected user/organization GitHub Pages site. Will deploy to main branch..." "$BLUE"
+fi
+
+# Switch to target branch (create if it doesn't exist)
+print_message "Switching to $TARGET_BRANCH branch..." "$PURPLE"
+if git show-ref --verify --quiet refs/heads/$TARGET_BRANCH; then
+  git checkout $TARGET_BRANCH
 else
-  git checkout --orphan gh-pages
+  git checkout --orphan $TARGET_BRANCH
   git rm -rf .
   touch .nojekyll # Ensure GitHub doesn't process files with Jekyll
 fi
@@ -210,9 +223,9 @@ git add -A
 print_message "Committing changes to gh-pages branch..." "$GREEN"
 git commit -m "Deploy to GitHub Pages: $(date)"
 
-# Push to remote gh-pages branch
-print_message "Pushing to GitHub Pages..." "$GREEN"
-if ! git push origin gh-pages; then
+# Push to remote target branch
+print_message "Pushing to $TARGET_BRANCH branch..." "$GREEN"
+if ! git push origin $TARGET_BRANCH; then
   print_message "Push rejected. Attempting force push with --force-with-lease..." "$YELLOW"
   
   # Ask for confirmation before force pushing
@@ -220,7 +233,7 @@ if ! git push origin gh-pages; then
   echo
   
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    if git push --force-with-lease origin gh-pages; then
+    if git push --force-with-lease origin $TARGET_BRANCH; then
       print_message "Force push successful." "$GREEN"
     else
       print_message "Force push failed. Attempting full force push..." "$YELLOW"
@@ -229,28 +242,42 @@ if ! git push origin gh-pages; then
       echo
       
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        if git push --force origin gh-pages; then
+        if git push --force origin $TARGET_BRANCH; then
           print_message "Full force push successful." "$GREEN"
         else
           print_message "Failed to push to GitHub Pages. Manual intervention required." "$RED"
-          print_message "You can run: git push --force origin gh-pages" "$YELLOW"
+          print_message "You can run: git push --force origin $TARGET_BRANCH" "$YELLOW"
           exit 1
         fi
       else
-        print_message "Deployment aborted. Your local gh-pages branch has the changes, but they weren't pushed." "$RED"
+        print_message "Deployment aborted. Your local $TARGET_BRANCH branch has the changes, but they weren't pushed." "$RED"
         exit 1
       fi
     fi
   else
-    print_message "Deployment aborted. Your local gh-pages branch has the changes, but they weren't pushed." "$RED"
-    print_message "You might want to pull changes first with: git pull origin gh-pages" "$YELLOW"
+    print_message "Deployment aborted. Your local $TARGET_BRANCH branch has the changes, but they weren't pushed." "$RED"
+    print_message "You might want to pull changes first with: git pull origin $TARGET_BRANCH" "$YELLOW"
     exit 1
   fi
 fi
 
 # Print success message
 print_message "✅ Deployment to GitHub Pages completed successfully!" "$GREEN"
+
+# Detect if this is a user/organization site or a project site
 REPO_URL=$(git config --get remote.origin.url)
-GITHUB_PAGES_URL=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//' | awk -F/ '{print $1".github.io/"$2}')
-print_message "🌐 Your site should be available at: https://$GITHUB_PAGES_URL/" "$GREEN"
-print_message "📚 Your docs should be available at: https://$GITHUB_PAGES_URL/docs/" "$GREEN"
+REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
+USER_NAME=$(echo "$REPO_NAME" | awk -F/ '{print $1}')
+REPO_BASENAME=$(echo "$REPO_NAME" | awk -F/ '{print $2}')
+
+if [[ "$REPO_BASENAME" == "$USER_NAME.github.io" ]]; then
+  # This is a user/organization site
+  print_message "🌐 Detected a GitHub user/organization site" "$GREEN"
+  print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/" "$GREEN"
+  print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/docs/" "$GREEN"
+else
+  # This is a project site
+  print_message "🌐 Detected a GitHub project site" "$GREEN"
+  print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/" "$GREEN"
+  print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/docs/" "$GREEN"
+fi
