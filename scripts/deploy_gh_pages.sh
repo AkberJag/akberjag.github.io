@@ -1,30 +1,22 @@
 #!/bin/bash
-# Build and deploy script for publishing frontend dist folder to GitHub Pages
+# Enhanced build and deploy script for publishing both frontend and docs to GitHub Pages
 #
-# This script automates the process of building a frontend project and deploying
-# the `dist` folder to the `gh-pages` branch on GitHub for hosting via GitHub Pages.
+# This script automates the process of building a frontend project and its documentation,
+# then deploying them to the `gh-pages` branch on GitHub for hosting via GitHub Pages.
 #
 # Key Steps:
-# 1. Verifies that the script is run from the project root and checks for the `frontend` directory.
-# 2. Navigates to the `frontend` directory and checks for `package.json` to ensure it's a Node.js project.
-# 3. Installs dependencies (if not already installed), then builds the project using `npm run build`.
-# 4. Checks if the build was successful by verifying the existence of the `dist` folder.
-# 5. Commits the new build, adds the `dist` folder to Git, and pushes it to the `gh-pages` branch using `git subtree`.
-# 6. Pushes the latest changes to the current branch of the repository.
-#
-# Exit on any error to prevent partial or broken deployment.
-# Includes helpful error messages and logs for troubleshooting.
+# 1. Verifies the environment and project structure
+# 2. Builds both the main frontend project and VitePress documentation
+# 3. Creates a temporary directory to stage the deployment
+# 4. Copies both build outputs to the staging directory
+# 5. Deploys to the gh-pages branch without affecting the main branch
 #
 # How to run this script:
-# 1. Ensure you're in the project root directory.
-# 2. Run the following command in the terminal:
 # bash scripts/deploy_gh_pages.sh
 #
-# This assumes the script is located in the `scripts/` folder. If it's located elsewhere,
-# adjust the path accordingly when running the script.
-#
 set -e
-echo "🚀 Starting build and deployment process..."
+
+echo "🚀 Starting enhanced build and deployment process..."
 
 # Ensure we're in the project root
 if [ ! -d "frontend" ]; then
@@ -41,6 +33,12 @@ if [ ! -f "package.json" ]; then
     exit 1
 fi
 
+# Check if docs directory exists
+if [ ! -d "docs" ]; then
+    echo "❌ Error: docs directory not found in frontend directory"
+    exit 1
+fi
+
 # Get version from package.json
 VERSION=$(node -p "require('./package.json').version")
 if [ -z "$VERSION" ]; then
@@ -54,39 +52,72 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Build the project
-echo "🔨 Building the project..."
+# Create a fresh temp directory for deployment
+echo "🗂️ Creating temporary deployment directory..."
+TEMP_DEPLOY_DIR=$(mktemp -d)
+echo "   Using temporary directory: $TEMP_DEPLOY_DIR"
+
+# Build the main project
+echo "🔨 Building the main project..."
 npm run build
 
-# Check if build was successful
+# Check if main build was successful
 if [ ! -d "dist" ]; then
-    echo "❌ Build failed: dist directory not found"
+    echo "❌ Main build failed: dist directory not found"
+    rm -rf "$TEMP_DEPLOY_DIR"
     exit 1
 fi
 
-# Go back to project root
-cd ..
+# Copy main project build to temp deploy directory
+echo "📋 Copying main build to deployment directory..."
+cp -r dist/* "$TEMP_DEPLOY_DIR"
 
-# Force add and commit the new build
-echo "📝 Committing the new build..."
-git add frontend/dist -f
-git commit -m "🚀 deploy: Deploy version ${VERSION}" || echo "No changes to commit"
+# Build the docs
+echo "📚 Building documentation..."
+npm run docs:build
 
-echo "📦 Publishing frontend/dist folder to gh-pages branch..."
+# Check if docs build was successful
+if [ ! -d "docs/.vitepress/dist" ]; then
+    echo "❌ Docs build failed: docs/.vitepress/dist directory not found"
+    rm -rf "$TEMP_DEPLOY_DIR"
+    exit 1
+fi
+
+# Create docs subdirectory in the deployment directory
+mkdir -p "$TEMP_DEPLOY_DIR/docs"
+
+# Copy docs build to temp deploy directory
+echo "📋 Copying docs build to deployment directory..."
+cp -r docs/.vitepress/dist/* "$TEMP_DEPLOY_DIR/docs"
 
 # Get the current git branch
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-# Push the subtree
-if git subtree push --prefix frontend/dist origin gh-pages; then
+# Go back to project root
+cd ..
+
+# Deploy to gh-pages
+echo "📦 Publishing to gh-pages branch..."
+
+# Get the deployment directory ready for gh-pages
+cd "$TEMP_DEPLOY_DIR"
+git init
+git add .
+git config user.name "GitHub Actions"
+git config user.email "actions@github.com"
+git commit -m "🚀 deploy: Deploy version ${VERSION}"
+
+# Force push to the gh-pages branch
+if git push -f "https://github.com/$(git config --get remote.origin.url | sed 's/.*github.com[:/]\(.*\)\.git/\1/')" HEAD:gh-pages; then
     echo "✅ Successfully deployed to GitHub Pages!"
 else
-    echo "❌ Deployment failed. If you get a 'updates were rejected' error, try running:"
-    echo "git push origin `git subtree split --prefix frontend/dist $current_branch`:gh-pages --force"
+    echo "❌ Deployment failed."
+    exit 1
 fi
 
-# Push changes to remote
-echo "🔄 Pushing changes to remote..."
-git push origin $current_branch
+# Clean up
+echo "🧹 Cleaning up..."
+cd ..
+rm -rf "$TEMP_DEPLOY_DIR"
 
-echo "✨ All done! Version ${VERSION} has been deployed to GitHub Pages and pushed to remote."
+echo "✨ All done! Version ${VERSION} has been deployed to GitHub Pages."
