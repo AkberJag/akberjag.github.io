@@ -87,11 +87,13 @@ print_message "Created temporary directory for git worktree: $WORKTREE_DIR" "$BL
 # Check if the target branch exists
 if ! git show-ref --verify --quiet refs/heads/$TARGET_BRANCH; then
   print_message "$TARGET_BRANCH branch doesn't exist yet. Creating it..." "$YELLOW"
-  git checkout --orphan $TARGET_BRANCH
+  # Create an orphan branch without any content from the current branch
+  git checkout --orphan temp-$TARGET_BRANCH
   git rm -rf .
   touch .nojekyll
   git add .nojekyll
   git commit -m "Initial $TARGET_BRANCH branch commit"
+  git branch -M temp-$TARGET_BRANCH $TARGET_BRANCH
   git push origin $TARGET_BRANCH
   git checkout "$CURRENT_BRANCH"
 fi
@@ -154,6 +156,9 @@ if grep -q "vitepress" package.json; then
   fi
 fi
 
+# Return to project root
+cd "$START_DIR" || exit 1
+
 # Look for built Vitepress docs
 print_message "Looking for Vitepress build output..." "$CYAN"
 
@@ -163,18 +168,18 @@ DOCS_COPIED=false
 mkdir -p "$BUILD_TEMP_DIR/docs"
 
 # Check common Vitepress output locations
-if [ -d "docs/.vitepress/dist" ]; then
-  print_message "Found Vitepress docs at docs/.vitepress/dist" "$GREEN"
-  cp -r docs/.vitepress/dist/* "$BUILD_TEMP_DIR/docs/"
+if [ -d "frontend/docs/.vitepress/dist" ]; then
+  print_message "Found Vitepress docs at frontend/docs/.vitepress/dist" "$GREEN"
+  cp -r frontend/docs/.vitepress/dist/* "$BUILD_TEMP_DIR/docs/"
   DOCS_COPIED=true
-elif [ -d ".vitepress/dist" ]; then
-  print_message "Found Vitepress docs at .vitepress/dist" "$GREEN"
-  cp -r .vitepress/dist/* "$BUILD_TEMP_DIR/docs/"
+elif [ -d "frontend/.vitepress/dist" ]; then
+  print_message "Found Vitepress docs at frontend/.vitepress/dist" "$GREEN"
+  cp -r frontend/.vitepress/dist/* "$BUILD_TEMP_DIR/docs/"
   DOCS_COPIED=true
 else
   # Try to search for the dist directory
   print_message "Searching for Vitepress dist directory..." "$YELLOW"
-  VITEPRESS_DIST=$(find . -type d -name "dist" -path "*vitepress*" | head -n 1)
+  VITEPRESS_DIST=$(find frontend -type d -name "dist" -path "*vitepress*" | head -n 1)
   
   if [ -n "$VITEPRESS_DIST" ]; then
     print_message "Found Vitepress docs at $VITEPRESS_DIST" "$GREEN"
@@ -184,9 +189,9 @@ else
     print_message "No built Vitepress docs found. Copying raw docs files instead..." "$YELLOW"
     
     # Copy raw docs if they exist
-    if [ -d "docs" ]; then
+    if [ -d "frontend/docs" ]; then
       print_message "Copying raw docs directory..." "$YELLOW"
-      cp -r docs "$BUILD_TEMP_DIR/"
+      cp -r frontend/docs "$BUILD_TEMP_DIR/"
       DOCS_COPIED=true
     fi
   fi
@@ -197,9 +202,9 @@ if [ "$DOCS_COPIED" = false ]; then
 fi
 
 # Copy Vue build to build temp directory
-if [ -d "dist" ]; then
+if [ -d "frontend/dist" ]; then
   print_message "Copying Vue build files to build temp directory..." "$CYAN"
-  cp -r dist/* "$BUILD_TEMP_DIR/"
+  cp -r frontend/dist/* "$BUILD_TEMP_DIR/"
 else
   print_message "Error: Vue dist directory not found. Build may have failed." "$RED"
   exit 1
@@ -215,9 +220,14 @@ find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} \;
 # Add a .nojekyll file to bypass GitHub Pages Jekyll processing
 touch .nojekyll
 
-# Copy build files from build temp directory
+# Copy build files from build temp directory to worktree
 print_message "Copying build files to $TARGET_BRANCH branch worktree..." "$CYAN"
 cp -r "$BUILD_TEMP_DIR"/* .
+
+# Make sure no node_modules directories were copied
+print_message "Ensuring no node_modules or unwanted build artifacts were copied..." "$YELLOW"
+find . -type d -name "node_modules" -exec rm -rf {} +
+find . -type d -name ".git" -not -path "./.git" -exec rm -rf {} +
 
 # Stage all files
 print_message "Staging files for commit..." "$GREEN"
