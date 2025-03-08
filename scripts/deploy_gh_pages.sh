@@ -31,15 +31,31 @@ echo -e "${BLUE}⬇️ Pulling latest changes from ${YELLOW}$MAIN_BRANCH${BLUE}.
 git checkout $MAIN_BRANCH
 git pull origin $MAIN_BRANCH
 
+# Install dependencies in frontend directory
+echo -e "${CYAN}📦 Installing frontend dependencies...${NC}"
+cd $FRONTEND_DIR
+npm install
+cd ..
+
+# Install dependencies for Vitepress docs
+echo -e "${CYAN}📦 Installing documentation dependencies...${NC}"
+cd docs
+npm install
+cd ..
+
 # Build main Vue application
 echo -e "${GREEN}🔨 Building Vue application...${NC}"
 cd $FRONTEND_DIR
-npm run build
+# Use npx to ensure we use the locally installed vite
+npx vite build
 cd ..
 
 # Build Vitepress documentation
 echo -e "${GREEN}📚 Building Vitepress documentation...${NC}"
-npm run docs:build
+cd docs
+# Use npx to ensure we use the locally installed vitepress
+npx vitepress build
+cd ..
 
 # Create a temporary directory for our deployment files
 echo -e "${PURPLE}📁 Creating temporary directory for deployment...${NC}"
