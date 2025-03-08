@@ -252,13 +252,5 @@ if ! git push origin $TARGET_BRANCH; then
   fi
 fi
 
-# Get repo information for URL display
-REPO_URL=$(git config --get remote.origin.url)
-REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
-USER_NAME=$(echo "$REPO_NAME" | awk -F/ '{print $1}')
-REPO_BASENAME=$(echo "$REPO_NAME" | awk -F/ '{print $2}')
-
 # Print success message
 print_message "✅ Deployment to GitHub Pages completed successfully!" "$GREEN"
-print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/" "$GREEN"
-print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/docs/" "$GREEN"
