@@ -6,15 +6,12 @@
   <link rel="icon" href="/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
-    // Check if we have a redirect path stored from 404.html
     (function () {
-      const redirectPath = sessionStorage.getItem('redirectPath');
-      if (redirectPath) {
-        // Clear the redirect path from sessionStorage
-        sessionStorage.removeItem('redirectPath');
-        // Add the path as a hash route that Vue router can handle
-        const newPath = redirectPath ? '/#/' + redirectPath : '/';
-        history.replaceState(null, null, newPath);
+      const redirect = sessionStorage.getItem('redirectFrom');
+      if (redirect) {
+        sessionStorage.removeItem('redirectFrom');
+        const route = redirect === '' ? '/' : `/${redirect}`;
+        history.replaceState(null, null, route);
       }
     })();
   </script>
