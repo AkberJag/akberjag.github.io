@@ -12,8 +12,9 @@
 # 5. Builds the project using `npm run build`.
 # 6. Checks if the builds were successful by verifying the existence of the `dist` folders.
 # 7. Uses `git subtree` to push the `dist` folder to the `gh-pages` branch without committing it to the current branch.
-# 8. Pushes the latest changes to the current branch of the repository (excluding the `dist` folder).
-# 9. Cleans up temporary files and directories created during the process.
+# 8. Removes the `dist` folder after successful deployment.
+# 9. Pushes the latest changes to the current branch of the repository (excluding the `dist` folder).
+# 10. Cleans up temporary files and directories created during the process.
 #
 # Exit on any error to prevent partial or broken deployment.
 # Includes helpful error messages and logs for troubleshooting.
@@ -114,6 +115,10 @@ current_branch=$(git rev-parse --abbrev-ref HEAD)
 # Push the subtree to gh-pages
 if git subtree push --prefix frontend/dist origin gh-pages; then
     echo "✅ Successfully deployed to GitHub Pages!"
+
+    # Remove the dist folder after successful deployment
+    echo "🧹 Removing dist folder..."
+    rm -rf frontend/dist || { echo "⚠️ Warning: Failed to remove dist folder"; }
 else
     echo "❌ Deployment failed. If you get a 'updates were rejected' error, try running:"
     echo "git push origin $(git subtree split --prefix frontend/dist $current_branch):gh-pages --force"
@@ -131,10 +136,6 @@ fi
 echo "🧹 Cleaning up temporary files and directories..."
 if [ -d "frontend/docs-dist" ]; then
     rm -rf frontend/docs-dist || { echo "⚠️ Warning: Failed to remove docs-dist directory"; }
-fi
-
-if [ -d "frontend/dist/docs" ]; then
-    rm -rf frontend/dist/docs || { echo "⚠️ Warning: Failed to remove dist/docs directory"; }
 fi
 
 echo "✨ All done! Version ${VERSION} has been deployed to GitHub Pages with documentation and pushed to remote."
