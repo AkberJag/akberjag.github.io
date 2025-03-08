@@ -64,12 +64,26 @@ fi
 
 # Copy built files to the temporary directory
 echo -e "${PURPLE}📋 Copying main app build files...${NC}"
-cp -r $BUILD_DIR/* $TEMP_DIR/
+if [ -d "$BUILD_DIR" ]; then
+  cp -r $BUILD_DIR/* $TEMP_DIR/ || { echo -e "${RED}❌ Failed to copy build files. Exiting...${NC}"; exit 1; }
+else
+  echo -e "${RED}⚠️ Warning: Build directory ($BUILD_DIR) not found. Skipping...${NC}"
+fi
 
 # Create a docs subdirectory in the temp folder
 echo -e "${PURPLE}📋 Copying documentation files...${NC}"
-mkdir -p $TEMP_DIR/docs
-cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/
+if [ -d "$DOCS_BUILD_DIR" ]; then
+  mkdir -p $TEMP_DIR/docs
+  cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/ || { echo -e "${RED}❌ Failed to copy documentation files. Exiting...${NC}"; exit 1; }
+else
+  echo -e "${RED}⚠️ Warning: Docs build directory ($DOCS_BUILD_DIR) not found. Skipping...${NC}"
+fi
+
+# Check if any files were copied
+if [ -z "$(ls -A "$TEMP_DIR")" ]; then
+  echo -e "${RED}❌ No files were copied to the temporary directory. Exiting...${NC}"
+  exit 1
+fi
 
 # Switch to the gh-pages branch
 echo -e "${YELLOW}🔄 Switching to ${CYAN}$DEPLOY_BRANCH${YELLOW} branch...${NC}"
@@ -115,5 +129,7 @@ git push origin $DEPLOY_BRANCH
 echo -e "${BLUE}🔄 Switching back to ${YELLOW}$CURRENT_BRANCH${BLUE} branch...${NC}"
 git checkout $CURRENT_BRANCH
 
+# Cleanup is already done above, so we don't need a separate cleanup step
+# The temporary directory has already been removed before committing
 
 echo -e "${GREEN}✅ Deployment complete! Your site should be available soon at your GitHub Pages URL.${NC}"
