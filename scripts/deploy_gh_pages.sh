@@ -186,10 +186,13 @@ REPO_URL=$(git config --get remote.origin.url)
 REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
 USER_NAME=$(echo "$REPO_NAME" | awk -F/ '{print $1}')
 REPO_BASENAME=$(echo "$REPO_NAME" | awk -F/ '{print $2}')
+
+# Convert to lowercase for reliable comparison
+REPO_LOWER=$(echo "$REPO_BASENAME" | tr '[:upper:]' '[:lower:]')
 TARGET_BRANCH="gh-pages"
 
 # For user/organization GitHub Pages, we deploy to the main branch
-if [[ "$REPO_BASENAME" == "$USER_NAME.github.io" ]]; then
+if [[ "$REPO_LOWER" == *"github.io"* ]]; then
   TARGET_BRANCH="main"
   print_message "Detected user/organization GitHub Pages site. Will deploy to main branch..." "$BLUE"
 fi
@@ -277,15 +280,17 @@ USER_NAME=$(echo "$REPO_NAME" | awk -F'/' '{print $1}')
 REPO_BASENAME=$(echo "$REPO_NAME" | awk -F'/' '{print $2}')
 print_message "Username: $USER_NAME, Repository: $REPO_BASENAME" "$BLUE"
 
-# Check if this is a user page or project page
-if [[ "$REPO_BASENAME" == "$USER_NAME.github.io" || "$REPO_BASENAME" == "$USER_NAME.GitHub.io" ]]; then
-  # This is a user/organization site (the repo name is username.github.io)
+# Check if this is a user page by looking for the pattern username.github.io
+# Convert both to lowercase for comparison
+USER_LOWER=$(echo "$USER_NAME" | tr '[:upper:]' '[:lower:]')
+REPO_LOWER=$(echo "$REPO_BASENAME" | tr '[:upper:]' '[:lower:]')
+USER_GITHUB_IO="${USER_LOWER}.github.io"
+
+print_message "Checking if '$REPO_LOWER' matches '$USER_GITHUB_IO'" "$BLUE"
+
+if [[ "$REPO_LOWER" == *"github.io"* ]]; then
+  # This is a user/organization site (repo name contains github.io)
   print_message "User/organization GitHub Pages detected" "$CYAN"
-  print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/" "$GREEN"
-  print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/docs/" "$GREEN"
-elif [[ "$REPO_BASENAME" == "" ]]; then
-  # If we couldn't parse the repo name correctly, assume it's a user site
-  print_message "Could not parse repository name correctly - assuming user site" "$YELLOW"
   print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/" "$GREEN"
   print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/docs/" "$GREEN"
 else
