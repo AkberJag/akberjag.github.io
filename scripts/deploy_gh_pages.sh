@@ -264,20 +264,33 @@ fi
 # Print success message
 print_message "✅ Deployment to GitHub Pages completed successfully!" "$GREEN"
 
-# Detect if this is a user/organization site or a project site
+# Get repository URL and parse it correctly
 REPO_URL=$(git config --get remote.origin.url)
-REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
-USER_NAME=$(echo "$REPO_NAME" | awk -F/ '{print $1}')
-REPO_BASENAME=$(echo "$REPO_NAME" | awk -F/ '{print $2}')
+print_message "Repository URL: $REPO_URL" "$BLUE"
 
-if [[ "$REPO_BASENAME" == "$USER_NAME.github.io" ]]; then
-  # This is a user/organization site
-  print_message "🌐 Detected a GitHub user/organization site" "$GREEN"
+# Clean the URL to get just the owner/repo part
+REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
+print_message "Repository name parsed as: $REPO_NAME" "$BLUE"
+
+# Split into username and repository parts
+USER_NAME=$(echo "$REPO_NAME" | awk -F'/' '{print $1}')
+REPO_BASENAME=$(echo "$REPO_NAME" | awk -F'/' '{print $2}')
+print_message "Username: $USER_NAME, Repository: $REPO_BASENAME" "$BLUE"
+
+# Check if this is a user page or project page
+if [[ "$REPO_BASENAME" == "$USER_NAME.github.io" || "$REPO_BASENAME" == "$USER_NAME.GitHub.io" ]]; then
+  # This is a user/organization site (the repo name is username.github.io)
+  print_message "User/organization GitHub Pages detected" "$CYAN"
+  print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/" "$GREEN"
+  print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/docs/" "$GREEN"
+elif [[ "$REPO_BASENAME" == "" ]]; then
+  # If we couldn't parse the repo name correctly, assume it's a user site
+  print_message "Could not parse repository name correctly - assuming user site" "$YELLOW"
   print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/" "$GREEN"
   print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/docs/" "$GREEN"
 else
-  # This is a project site
-  print_message "🌐 Detected a GitHub project site" "$GREEN"
+  # This is a project site (a normal repository)
+  print_message "Project GitHub Pages detected" "$CYAN"
   print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/" "$GREEN"
   print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/docs/" "$GREEN"
 fi
