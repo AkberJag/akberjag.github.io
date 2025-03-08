@@ -181,21 +181,9 @@ fi
 # Return to project root
 cd "$START_DIR" || exit 1
 
-# Detect if this is a user/organization site
-REPO_URL=$(git config --get remote.origin.url)
-REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
-USER_NAME=$(echo "$REPO_NAME" | awk -F/ '{print $1}')
-REPO_BASENAME=$(echo "$REPO_NAME" | awk -F/ '{print $2}')
-
-# Convert to lowercase for reliable comparison
-REPO_LOWER=$(echo "$REPO_BASENAME" | tr '[:upper:]' '[:lower:]')
+# Always use gh-pages branch
 TARGET_BRANCH="gh-pages"
-
-# For user/organization GitHub Pages, we deploy to the main branch
-if [[ "$REPO_LOWER" == *"github.io"* ]]; then
-  TARGET_BRANCH="main"
-  print_message "Detected user/organization GitHub Pages site. Will deploy to main branch..." "$BLUE"
-fi
+print_message "Target branch: $TARGET_BRANCH" "$BLUE"
 
 # Switch to target branch (create if it doesn't exist)
 print_message "Switching to $TARGET_BRANCH branch..." "$PURPLE"
@@ -208,11 +196,11 @@ else
 fi
 
 # Remove everything except .git folder and .nojekyll
-print_message "Cleaning gh-pages branch..." "$PURPLE"
+print_message "Cleaning $TARGET_BRANCH branch..." "$PURPLE"
 find . -maxdepth 1 ! -name '.git' ! -name '.' ! -name '.nojekyll' -exec rm -rf {} \;
 
 # Copy build files from temp directory
-print_message "Copying build files to gh-pages branch..." "$CYAN"
+print_message "Copying build files to $TARGET_BRANCH branch..." "$CYAN"
 cp -r "$TEMP_DIR"/* .
 
 # Add a .nojekyll file to bypass GitHub Pages Jekyll processing
@@ -223,7 +211,7 @@ print_message "Staging files for commit..." "$GREEN"
 git add -A
 
 # Commit changes
-print_message "Committing changes to gh-pages branch..." "$GREEN"
+print_message "Committing changes to $TARGET_BRANCH branch..." "$GREEN"
 git commit -m "Deploy to GitHub Pages: $(date)"
 
 # Push to remote target branch
@@ -232,7 +220,7 @@ if ! git push origin $TARGET_BRANCH; then
   print_message "Push rejected. Attempting force push with --force-with-lease..." "$YELLOW"
   
   # Ask for confirmation before force pushing
-  read -p "$(echo -e "${YELLOW}Remote gh-pages branch has diverged. Force push? (y/n): ${RESET}")" -n 1 -r
+  read -p "$(echo -e "${YELLOW}Remote $TARGET_BRANCH branch has diverged. Force push? (y/n): ${RESET}")" -n 1 -r
   echo
   
   if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -264,38 +252,13 @@ if ! git push origin $TARGET_BRANCH; then
   fi
 fi
 
+# Get repo information for URL display
+REPO_URL=$(git config --get remote.origin.url)
+REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
+USER_NAME=$(echo "$REPO_NAME" | awk -F/ '{print $1}')
+REPO_BASENAME=$(echo "$REPO_NAME" | awk -F/ '{print $2}')
+
 # Print success message
 print_message "✅ Deployment to GitHub Pages completed successfully!" "$GREEN"
-
-# Get repository URL and parse it correctly
-REPO_URL=$(git config --get remote.origin.url)
-print_message "Repository URL: $REPO_URL" "$BLUE"
-
-# Clean the URL to get just the owner/repo part
-REPO_NAME=$(echo "$REPO_URL" | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//')
-print_message "Repository name parsed as: $REPO_NAME" "$BLUE"
-
-# Split into username and repository parts
-USER_NAME=$(echo "$REPO_NAME" | awk -F'/' '{print $1}')
-REPO_BASENAME=$(echo "$REPO_NAME" | awk -F'/' '{print $2}')
-print_message "Username: $USER_NAME, Repository: $REPO_BASENAME" "$BLUE"
-
-# Check if this is a user page by looking for the pattern username.github.io
-# Convert both to lowercase for comparison
-USER_LOWER=$(echo "$USER_NAME" | tr '[:upper:]' '[:lower:]')
-REPO_LOWER=$(echo "$REPO_BASENAME" | tr '[:upper:]' '[:lower:]')
-USER_GITHUB_IO="${USER_LOWER}.github.io"
-
-print_message "Checking if '$REPO_LOWER' matches '$USER_GITHUB_IO'" "$BLUE"
-
-if [[ "$REPO_LOWER" == *"github.io"* ]]; then
-  # This is a user/organization site (repo name contains github.io)
-  print_message "User/organization GitHub Pages detected" "$CYAN"
-  print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/" "$GREEN"
-  print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/docs/" "$GREEN"
-else
-  # This is a project site (a normal repository)
-  print_message "Project GitHub Pages detected" "$CYAN"
-  print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/" "$GREEN"
-  print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/docs/" "$GREEN"
-fi
+print_message "🌐 Your site should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/" "$GREEN"
+print_message "📚 Your docs should be available at: https://$USER_NAME.github.io/$REPO_BASENAME/docs/" "$GREEN"
