@@ -1,149 +1,86 @@
 #!/bin/bash
-# Build and deploy script for publishing frontend dist folder to GitHub Pages
-#
-# This script automates the process of building a frontend project and its documentation
-# and deploying the `dist` folder to the `gh-pages` branch on GitHub for hosting via GitHub Pages.
-#
-set -euo pipefail
 
-# Define temp directories to be cleaned up
-TEMP_DIRS=("gh-pages-temp" "frontend/docs-dist" "frontend/dist")
+# Exit script if any command fails
+set -e
 
-# Enhanced cleanup function to remove all temporary directories
-cleanup() {
-    echo "🧹 Cleaning up temporary files and directories..."
-    for dir in "${TEMP_DIRS[@]}"; do
-        if [ -d "$dir" ]; then
-            rm -rf "$dir" || echo "⚠️ Warning: Failed to remove $dir directory"
-        fi
-    done
-    echo "✅ Cleanup complete!"
-}
+# Colors for better readability
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-# Ensure cleanup happens no matter how the script exits
-trap cleanup EXIT INT TERM
+# Configuration
+MAIN_BRANCH="main"  # Change this to your main branch name if different (e.g., master)
+DEPLOY_BRANCH="gh-pages"
+BUILD_DIR="dist"  # Default Vue build directory
+DOCS_BUILD_DIR="docs/.vitepress/dist"  # Default Vitepress build directory
+TEMP_DIR="gh-pages-tmp"
 
-echo "🚀 Starting build and deployment process..."
+echo -e "${CYAN}🚀 Starting deployment process...${NC}"
 
-# Store current directory to return to it later
-CURRENT_DIR=$(pwd)
+# Save current branch to return to it later
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo -e "${BLUE}📌 Current branch: ${YELLOW}$CURRENT_BRANCH${NC}"
 
-# Ensure we're in the project root
-if [ ! -d "frontend" ]; then
-    echo "❌ Error: frontend directory not found. Are you in the project root?"
-    exit 1
-fi
+# Make sure we have the latest changes
+echo -e "${BLUE}⬇️ Pulling latest changes from ${YELLOW}$MAIN_BRANCH${BLUE}...${NC}"
+git checkout $MAIN_BRANCH
+git pull origin $MAIN_BRANCH
 
-# Navigate to frontend directory
-cd frontend || { echo "❌ Error: Failed to navigate to frontend directory"; exit 1; }
+# Build main Vue application
+echo -e "${GREEN}🔨 Building Vue application...${NC}"
+npm run build
 
-# Check if package.json exists
-if [ ! -f "package.json" ]; then
-    echo "❌ Error: package.json not found in frontend directory"
-    exit 1
-fi
+# Build Vitepress documentation
+echo -e "${GREEN}📚 Building Vitepress documentation...${NC}"
+npm run docs:build
 
-# Get version from package.json with improved error handling
-VERSION=$(node -p "try { require('./package.json').version } catch(e) { '' }" || echo "latest")
-if [ -z "$VERSION" ]; then
-    echo "⚠️ Warning: Could not get version from package.json, using 'latest' instead"
-    VERSION="latest"
-fi
+# Create a temporary directory for our deployment files
+echo -e "${PURPLE}📁 Creating temporary directory for deployment...${NC}"
+mkdir -p $TEMP_DIR
 
-# Install dependencies if needed
-if [ ! -d "node_modules" ]; then
-    echo "📦 Installing dependencies..."
-    npm install || { echo "❌ Error: Failed to install dependencies"; exit 1; }
-fi
+# Copy built files to the temporary directory
+echo -e "${PURPLE}📋 Copying main app build files...${NC}"
+cp -r $BUILD_DIR/* $TEMP_DIR/
 
-# Check if docs directory exists
-if [ ! -d "docs" ]; then
-    echo "❌ Error: docs directory not found in frontend directory"
-    exit 1
-fi
+# Create a docs subdirectory in the temp folder
+echo -e "${PURPLE}📋 Copying documentation files...${NC}"
+mkdir -p $TEMP_DIR/docs
+cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/
 
-# Build the docs
-echo "📚 Building the documentation..."
-npm run docs:build || { echo "❌ Error: Docs build failed"; exit 1; }
+# Switch to the gh-pages branch
+echo -e "${YELLOW}🔄 Switching to ${CYAN}$DEPLOY_BRANCH${YELLOW} branch...${NC}"
+git checkout $DEPLOY_BRANCH || git checkout -b $DEPLOY_BRANCH
 
-# Check if docs build was successful
-if [ ! -d "docs/.vitepress/dist" ]; then
-    echo "❌ Docs build failed: docs/.vitepress/dist directory not found"
-    exit 1
-fi
+# Remove existing files to avoid conflicts
+echo -e "${RED}🗑️ Cleaning old files from ${YELLOW}$DEPLOY_BRANCH${RED}...${NC}"
+find . -maxdepth 1 ! -path . ! -path ./.git ! -path ./$TEMP_DIR -exec rm -rf {} \;
 
-# Copy docs dist to a separate directory for deployment
-echo "📋 Copying docs build to docs-dist directory..."
-mkdir -p docs-dist
-cp -r docs/.vitepress/dist/* docs-dist/ || { echo "❌ Error: Failed to copy docs build"; exit 1; }
+# Move the built files to the root
+echo -e "${BLUE}📦 Moving built files to root directory...${NC}"
+cp -r $TEMP_DIR/* .
 
-# Build the project
-echo "🔨 Building the main project..."
-npm run build || { echo "❌ Error: Build failed"; exit 1; }
+# Add all files to git
+echo -e "${YELLOW}➕ Adding files to git...${NC}"
+git add -A
 
-# Check if build was successful
-if [ ! -d "dist" ]; then
-    echo "❌ Build failed: dist directory not found"
-    exit 1
-fi
+# Commit changes
+echo -e "${YELLOW}💾 Committing changes...${NC}"
+git commit -m "Deploy to GitHub Pages - $(date)" || echo -e "${RED}No changes to commit${NC}"
 
-# Copy docs to the dist directory
-echo "🔄 Copying documentation to dist/docs directory..."
-mkdir -p dist/docs
-cp -r docs-dist/* dist/docs/ || { echo "❌ Error: Failed to copy docs to dist/docs"; exit 1; }
+# Push to GitHub Pages
+echo -e "${CYAN}☁️ Pushing to ${YELLOW}$DEPLOY_BRANCH${CYAN} branch...${NC}"
+git push origin $DEPLOY_BRANCH
 
-# Go back to project root
-cd "$CURRENT_DIR" || { echo "❌ Error: Failed to navigate back to project root"; exit 1; }
+# Switch back to the original branch
+echo -e "${BLUE}🔄 Switching back to ${YELLOW}$CURRENT_BRANCH${BLUE} branch...${NC}"
+git checkout $CURRENT_BRANCH
 
-# Get the current git branch
-current_branch=$(git rev-parse --abbrev-ref HEAD)
+# Cleanup
+echo -e "${GREEN}🧹 Cleaning up temporary files...${NC}"
+rm -rf $TEMP_DIR
 
-# Create a temp directory for the gh-pages branch
-echo "📂 Creating temporary directory for gh-pages content..."
-mkdir -p gh-pages-temp
-
-# Copy the build files to the temporary directory
-echo "📋 Copying dist files to temporary directory..."
-cp -r frontend/dist/* gh-pages-temp/ || { echo "❌ Error: Failed to copy dist files"; exit 1; }
-
-# Deploy to gh-pages
-echo "📦 Publishing to gh-pages branch..."
-cd gh-pages-temp || { echo "❌ Error: Failed to navigate to gh-pages-temp"; exit 1; }
-
-# Get repository URL with better error handling
-REPO_URL=$(git -C "$CURRENT_DIR" config --get remote.origin.url || echo "")
-if [ -z "$REPO_URL" ]; then
-    echo "❌ Error: Failed to get repository URL"
-    exit 1
-fi
-
-# Extract username and repo name from the URL with better regex handling
-REPO_PATH=$(echo "$REPO_URL" | sed -E 's/.*[:/]([^/]+\/[^/]+)(\.git)?$/\1/')
-if [ -z "$REPO_PATH" ]; then
-    echo "❌ Error: Failed to extract repo path from URL: $REPO_URL"
-    exit 1
-fi
-
-# Initialize git in the temp directory with improved error handling
-git init -q || { echo "❌ Error: Failed to initialize git repo"; exit 1; }
-git checkout -b gh-pages || { echo "❌ Error: Failed to create gh-pages branch"; exit 1; }
-git add . || { echo "❌ Error: Failed to stage files"; exit 1; }
-git commit -m "Deploy version ${VERSION} to GitHub Pages" || { echo "❌ Error: Failed to commit files"; exit 1; }
-
-# Force push to the gh-pages branch
-echo "🔄 Pushing to gh-pages branch..."
-if git push -f "git@github.com:${REPO_PATH}" gh-pages; then
-    echo "✅ Successfully deployed to GitHub Pages!"
-else
-    echo "❌ Deployment failed."
-    exit 1
-fi
-
-# Go back to project root
-cd "$CURRENT_DIR" || { echo "❌ Error: Failed to navigate back to project root"; exit 1; }
-
-# Push changes to remote (excluding the dist folder)
-echo "🔄 Pushing changes to remote (current branch: $current_branch)..."
-git push origin "$current_branch" || { echo "❌ Error: Failed to push changes to remote"; exit 1; }
-
-echo "✨ All done! Version ${VERSION} has been deployed to GitHub Pages with documentation and pushed to remote."
+echo -e "${GREEN}✅ Deployment complete! Your site should be available soon at your GitHub Pages URL.${NC}"
