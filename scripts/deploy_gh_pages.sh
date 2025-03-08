@@ -15,7 +15,8 @@ NC='\033[0m' # No Color
 # Configuration
 MAIN_BRANCH="main"  # Change this to your main branch name if different (e.g., master)
 DEPLOY_BRANCH="gh-pages"
-BUILD_DIR="dist"  # Default Vue build directory
+FRONTEND_DIR="frontend"  # Your frontend code location
+BUILD_DIR="$FRONTEND_DIR/dist"  # Vue build directory
 DOCS_BUILD_DIR="docs/.vitepress/dist"  # Default Vitepress build directory
 TEMP_DIR="gh-pages-tmp"
 
@@ -32,7 +33,9 @@ git pull origin $MAIN_BRANCH
 
 # Build main Vue application
 echo -e "${GREEN}🔨 Building Vue application...${NC}"
+cd $FRONTEND_DIR
 npm run build
+cd ..
 
 # Build Vitepress documentation
 echo -e "${GREEN}📚 Building Vitepress documentation...${NC}"
