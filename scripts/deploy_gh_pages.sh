@@ -64,33 +64,18 @@ fi
 
 # Copy built files to the temporary directory
 echo -e "${PURPLE}📋 Copying main app build files...${NC}"
-if [ -d "$BUILD_DIR" ]; then
-  cp -r $BUILD_DIR/* $TEMP_DIR/ || { echo -e "${RED}❌ Failed to copy build files. Exiting...${NC}"; exit 1; }
-else
-  echo -e "${RED}⚠️ Warning: Build directory ($BUILD_DIR) not found. Skipping...${NC}"
-fi
+cp -r $BUILD_DIR/* $TEMP_DIR/
 
 # Create a docs subdirectory in the temp folder
 echo -e "${PURPLE}📋 Copying documentation files...${NC}"
-if [ -d "$DOCS_BUILD_DIR" ]; then
-  mkdir -p $TEMP_DIR/docs
-  cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/ || { echo -e "${RED}❌ Failed to copy documentation files. Exiting...${NC}"; exit 1; }
-else
-  echo -e "${RED}⚠️ Warning: Docs build directory ($DOCS_BUILD_DIR) not found. Skipping...${NC}"
-fi
-
-# Check if any files were copied
-if [ -z "$(ls -A "$TEMP_DIR")" ]; then
-  echo -e "${RED}❌ No files were copied to the temporary directory. Exiting...${NC}"
-  exit 1
-fi
+mkdir -p $TEMP_DIR/docs
+cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/
 
 # Switch to the gh-pages branch
 echo -e "${YELLOW}🔄 Switching to ${CYAN}$DEPLOY_BRANCH${YELLOW} branch...${NC}"
 if git show-ref --verify --quiet refs/heads/$DEPLOY_BRANCH; then
-  # Branch exists, force switch to it (discard any untracked files that might conflict)
-  echo -e "${YELLOW}⚠️ Force checking out $DEPLOY_BRANCH to avoid conflicts...${NC}"
-  git checkout -f $DEPLOY_BRANCH
+  # Branch exists, switch to it
+  git checkout $DEPLOY_BRANCH
   # Pull latest changes to avoid conflicts
   git pull origin $DEPLOY_BRANCH --rebase || true
 else
@@ -98,12 +83,13 @@ else
   git checkout -b $DEPLOY_BRANCH
 fi
 
-# Remove existing files to avoid conflicts (but leave .git directory)
+# Copy .gitignore from main branch to ensure temp directory is ignored
+echo -e "${BLUE}📝 Copying .gitignore from main branch...${NC}"
+git show $MAIN_BRANCH:.gitignore > .gitignore 2>/dev/null || echo "$TEMP_DIR/" >> .gitignore
+
+# Remove existing files to avoid conflicts (but leave .git directory and .gitignore)
 echo -e "${RED}🗑️ Cleaning old files from ${YELLOW}$DEPLOY_BRANCH${RED}...${NC}"
-# Use git clean to remove untracked files
-git clean -fd
-# Then remove tracked files (except .git)
-find . -maxdepth 1 ! -path . ! -path ./.git -exec rm -rf {} \;
+find . -maxdepth 1 ! -path . ! -path ./.git ! -path ./.gitignore -exec rm -rf {} \;
 
 # Move the built files to the root
 echo -e "${BLUE}📦 Moving built files to root directory...${NC}"
@@ -129,7 +115,5 @@ git push origin $DEPLOY_BRANCH
 echo -e "${BLUE}🔄 Switching back to ${YELLOW}$CURRENT_BRANCH${BLUE} branch...${NC}"
 git checkout $CURRENT_BRANCH
 
-# Cleanup is already done above, so we don't need a separate cleanup step
-# The temporary directory has already been removed before committing
 
 echo -e "${GREEN}✅ Deployment complete! Your site should be available soon at your GitHub Pages URL.${NC}"
