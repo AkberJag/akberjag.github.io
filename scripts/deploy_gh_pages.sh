@@ -1,121 +1,145 @@
 #!/bin/bash
 
-# Exit script if any command fails
-set -e
-
-# Colors for better readability
+# Colors for terminal output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+RESET='\033[0m' # Reset color
 
-# Configuration
-MAIN_BRANCH="main"  # Change this to your main branch name if different (e.g., master)
-DEPLOY_BRANCH="gh-pages"
-FRONTEND_DIR="frontend"  # Your frontend code location
-BUILD_DIR="$FRONTEND_DIR/dist"  # Vue build directory
-DOCS_DIR="$FRONTEND_DIR/docs"  # Documentation directory inside frontend
-DOCS_BUILD_DIR="$DOCS_DIR/.vitepress/dist"  # Vitepress build directory
-TEMP_DIR="gh-pages-tmp"
+# Function to print colored messages
+print_message() {
+  echo -e "${2}${1}${RESET}"
+}
 
-# Create a temporary directory for our deployment files
-echo -e "${PURPLE}📁 Creating temporary directory for deployment...${NC}"
-mkdir -p $TEMP_DIR
+# Check if git is installed
+if ! command -v git &> /dev/null; then
+  print_message "Git is not installed. Please install git first." "$RED"
+  exit 1
+fi
 
-echo -e "${CYAN}🚀 Starting deployment process...${NC}"
+# Check if npm is installed
+if ! command -v npm &> /dev/null; then
+  print_message "npm is not installed. Please install Node.js and npm first." "$RED"
+  exit 1
+fi
 
-# Save current branch to return to it later
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-echo -e "${BLUE}📌 Current branch: ${YELLOW}$CURRENT_BRANCH${NC}"
+# Ensure we're in the project root
+if [ ! -d "frontend" ]; then
+  print_message "Error: frontend directory not found. Make sure you're running this from the project root." "$RED"
+  exit 1
+fi
 
-# Make sure we have the latest changes
-echo -e "${BLUE}⬇️ Pulling latest changes from ${YELLOW}$MAIN_BRANCH${BLUE}...${NC}"
-git checkout $MAIN_BRANCH
-git pull origin $MAIN_BRANCH
+# Store current branch name
+CURRENT_BRANCH=$(git branch --show-current)
+print_message "Current branch: $CURRENT_BRANCH" "$BLUE"
 
-# Install dependencies in frontend directory
-echo -e "${CYAN}📦 Installing frontend dependencies...${NC}"
-cd $FRONTEND_DIR
+# Ensure the working directory is clean
+if [[ -n $(git status --porcelain) ]]; then
+  print_message "Error: Working directory is not clean. Please commit or stash your changes before deploying." "$RED"
+  exit 1
+fi
+
+# Create a temporary directory for the build
+TEMP_DIR=$(mktemp -d)
+print_message "Created temporary directory for build: $TEMP_DIR" "$BLUE"
+
+# Install dependencies in the frontend directory
+print_message "Installing dependencies..." "$YELLOW"
+cd frontend
 npm install
-cd ..
-
-# No need for separate docs installation since docs are inside frontend
-
-# Build main Vue application
-echo -e "${GREEN}🔨 Building Vue application...${NC}"
-cd $FRONTEND_DIR
-# Use npx to ensure we use the locally installed vite
-npx vite build
-cd ..
-
-# Build Vitepress documentation
-echo -e "${GREEN}📚 Building Vitepress documentation...${NC}"
-cd $DOCS_DIR
-# Use npx to ensure we use the locally installed vitepress
-npx vitepress build
-cd ../..  # Return to project root (two levels up from docs dir)
-
-# Clean up any existing temporary directory to avoid conflicts
-if [ -d "$TEMP_DIR" ]; then
-  echo -e "${RED}🗑️ Removing existing temporary directory...${NC}"
-  rm -rf $TEMP_DIR
+if [ $? -ne 0 ]; then
+  print_message "Failed to install dependencies." "$RED"
+  exit 1
 fi
 
-# Copy built files to the temporary directory
-echo -e "${PURPLE}📋 Copying main app build files...${NC}"
-cp -r $BUILD_DIR/* $TEMP_DIR/
+# Build the Vue application
+print_message "Building Vue application..." "$YELLOW"
+npm run build
+if [ $? -ne 0 ]; then
+  print_message "Failed to build Vue application." "$RED"
+  exit 1
+fi
 
-# Create a docs subdirectory in the temp folder
-echo -e "${PURPLE}📋 Copying documentation files...${NC}"
-mkdir -p $TEMP_DIR/docs
-cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/
+# Check if Vitepress docs exist
+if [ -d "docs" ]; then
+  print_message "Building Vitepress documentation..." "$YELLOW"
+  
+  # Check if docs have their own package.json
+  if [ -f "docs/package.json" ]; then
+    cd docs
+    npm install
+    npm run build
+    if [ $? -ne 0 ]; then
+      print_message "Failed to build Vitepress documentation." "$RED"
+      exit 1
+    fi
+    cd ..
+  else
+    # Try to build docs from frontend root
+    npm run docs:build
+    if [ $? -ne 0 ]; then
+      print_message "Failed to build Vitepress documentation." "$RED"
+      exit 1
+    fi
+  fi
+  
+  # Copy Vitepress build to temp directory
+  print_message "Copying Vitepress documentation to temp directory..." "$CYAN"
+  if [ -d "docs/.vitepress/dist" ]; then
+    cp -r docs/.vitepress/dist/* "$TEMP_DIR/docs"
+  fi
+fi
 
-# Switch to the gh-pages branch
-echo -e "${YELLOW}🔄 Switching to ${CYAN}$DEPLOY_BRANCH${YELLOW} branch...${NC}"
-if git show-ref --verify --quiet refs/heads/$DEPLOY_BRANCH; then
-  # Branch exists, switch to it
-  git checkout $DEPLOY_BRANCH
-  # Pull latest changes to avoid conflicts
-  git pull origin $DEPLOY_BRANCH --rebase || true
+# Copy Vue build to temp directory
+print_message "Copying Vue build files to temp directory..." "$CYAN"
+cp -r dist/* "$TEMP_DIR"
+
+# Return to project root
+cd ..
+
+# Switch to gh-pages branch (create if it doesn't exist)
+print_message "Switching to gh-pages branch..." "$PURPLE"
+if git show-ref --verify --quiet refs/heads/gh-pages; then
+  git checkout gh-pages
 else
-  # Branch doesn't exist, create it
-  git checkout -b $DEPLOY_BRANCH
+  git checkout --orphan gh-pages
+  git rm -rf .
+  touch .nojekyll # Ensure GitHub doesn't process files with Jekyll
 fi
 
-# Copy .gitignore from main branch to ensure temp directory is ignored
-echo -e "${BLUE}📝 Copying .gitignore from main branch...${NC}"
-git show $MAIN_BRANCH:.gitignore > .gitignore 2>/dev/null || echo "$TEMP_DIR/" >> .gitignore
+# Remove everything except .git folder
+print_message "Cleaning gh-pages branch..." "$PURPLE"
+find . -maxdepth 1 ! -name '.git' ! -name '.' ! -name '.nojekyll' -exec rm -rf {} \;
 
-# Remove existing files to avoid conflicts (but leave .git directory and .gitignore)
-echo -e "${RED}🗑️ Cleaning old files from ${YELLOW}$DEPLOY_BRANCH${RED}...${NC}"
-find . -maxdepth 1 ! -path . ! -path ./.git ! -path ./.gitignore -exec rm -rf {} \;
+# Copy build files from temp directory
+print_message "Copying build files to gh-pages branch..." "$CYAN"
+cp -r "$TEMP_DIR"/* .
 
-# Move the built files to the root
-echo -e "${BLUE}📦 Moving built files to root directory...${NC}"
-cp -r $TEMP_DIR/* .
+# Add a .nojekyll file to bypass GitHub Pages Jekyll processing
+touch .nojekyll
 
-# Remove the temporary directory to avoid committing it
-echo -e "${RED}🗑️ Removing temporary directory from git...${NC}"
-rm -rf $TEMP_DIR
-
-# Add all files to git
-echo -e "${YELLOW}➕ Adding files to git...${NC}"
+# Stage all files
+print_message "Staging files for commit..." "$GREEN"
 git add -A
 
 # Commit changes
-echo -e "${YELLOW}💾 Committing changes...${NC}"
-git commit -m "Deploy to GitHub Pages - $(date)" || echo -e "${RED}No changes to commit${NC}"
+print_message "Committing changes to gh-pages branch..." "$GREEN"
+git commit -m "Deploy to GitHub Pages: $(date)"
 
-# Push to GitHub Pages
-echo -e "${CYAN}☁️ Pushing to ${YELLOW}$DEPLOY_BRANCH${CYAN} branch...${NC}"
-git push origin $DEPLOY_BRANCH
+# Push to remote gh-pages branch
+print_message "Pushing to GitHub Pages..." "$GREEN"
+git push origin gh-pages
 
 # Switch back to the original branch
-echo -e "${BLUE}🔄 Switching back to ${YELLOW}$CURRENT_BRANCH${BLUE} branch...${NC}"
-git checkout $CURRENT_BRANCH
+print_message "Switching back to $CURRENT_BRANCH branch..." "$BLUE"
+git checkout "$CURRENT_BRANCH"
 
+# Clean up temporary directory
+print_message "Cleaning up temporary files..." "$YELLOW"
+rm -rf "$TEMP_DIR"
 
-echo -e "${GREEN}✅ Deployment complete! Your site should be available soon at your GitHub Pages URL.${NC}"
+print_message "✅ Deployment to GitHub Pages completed successfully!" "$GREEN"
+print_message "🌐 Your site should be available at: https://$(git config --get remote.origin.url | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//' | awk -F/ '{print $1".github.io/"$2}')/" "$GREEN"
