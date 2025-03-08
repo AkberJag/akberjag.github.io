@@ -7,25 +7,48 @@
   "sections": {
     "home": {
       "name": "Home",
-      "pageTitle": "John Doe {'|'} Web Developer & Designer",
+      "pageTitle": "Akber Jagannath {'|'} Python developer 🐍",
       "greeting": "Hey there!",
-      "personName": "John Doe",
+      "personName": "Akber Jagannath",
       "secondaryName": "VU3CXF",
-      "title": "Web Developer & Designer",
-      "subtitle": "Ham Radio Enthusiast",
+      "title": "Your friendly neighborhood Python developer 🐍",
+      "subtitle": "and an Amateur radio operator 📡",
       "itsMe": "It's me",
       "getInTouch": "Get in Touch"
     },
     "about": {
       "name": "About",
-      "pageTitle": "About Me {'|'} John Doe",
+      "pageTitle": "About Me {'|'} Akber Jagannath",
       "heading": "About Me",
-      "description": "A fully customizable portfolio website template built using Vue.js, Tailwind CSS, PrimeVue 4, and Lucide Icons. Easily modify the layout, add or remove sections, and showcase your work in a modern, responsive format. This project is perfect for developers, designers, or anyone looking for a clean and customizable online portfolio. Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure, voluptatibus ullam? Iste quos, atque nam exercitationem veritatis distinctio inventore enim sunt sint doloremque, sapiente modi autem fuga quis, perferendis placeat. Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quia, voluptas commodi. Cupiditate quas, accusantium quibusdam officiis, eligendi necessitatibus iste a eius hic quasi error sequi atque animi amet voluptatum iure."
+      "description": "A Python enthusiast",
+      "paragraph1": {
+        "before_flask": "A Python enthusiast who loves bringing ideas to life with code. I've got experience working with",
+        "flask": "Flask",
+        "between_flask_fastapi": "and",
+        "fastapi": "FastAPI",
+        "between_fastapi_vue": "to build cool web apps and APIs, and I'm also pretty handy with",
+        "vue": "Vue.js",
+        "after_vue": "to create smooth and interactive front-ends."
+      },
+      "paragraph2": {
+        "before_godot": "When I'm not coding for work, you'll probably find me making mobile games with",
+        "godot": "Godot",
+        "after_godot": "🎮. I love blending creativity with programming, and it's a fun way to keep learning and trying new things."
+      },
+      "paragraph3": {
+        "before_radio": "Oh, and I'm also a certified",
+        "radio": "amateur radio operator",
+        "middle": "📡! With some",
+        "field": "field and rescue",
+        "between_field_problem": "experience under my belt, I've gained a knack for",
+        "problem": "problem-solving",
+        "after_problem": "and working well under pressure."
+      },
+      "paragraph4": "Whether it's developing software, testing games, or experimenting with new projects, I'm always up for a challenge. Let's create something awesome together! 🚀"
     },
     "licensesAndCerts": {
       "name": "Licenses and Certifications",
-      "pageTitle": "Licenses and Certifications {'|'} John Doe",
-      "heading": "Licenses and Certifications",
+      "pageTitle": "Licenses and Certifications {'|'} Akber Jagannath",
       "additionalHeading": "Additional Certifications",
       "verifyButton": "Verify Certification",
       "featured": {
@@ -34,83 +57,42 @@
           "alt": "AWS Cloud Practitioner Certification Badge",
           "details": "Validates overall understanding of the AWS Cloud"
         },
-        "aws_da": {
-          "title": "AWS Certified Developer - Associate",
-          "alt": "AWS Developer Associate Certification Badge",
-          "details": "Design, develop, and manage robust, secure, scalable, highly available, and dynamic solutions to drive business objectives"
-        },
         "radio": {
           "title": "Amateur Wireless Station license",
           "alt": "Amateur Radio License Badge",
           "details": "Licensed amateur radio operator with expertise in wireless communications"
         }
-      },
-      "other": {
-        "react": {
-          "title": "React Developer",
-          "alt": "React Developer Certification"
-        },
-        "vue": {
-          "title": "Vue.js Developer",
-          "alt": "Vue.js Developer Certification"
-        },
-        "typescript": {
-          "title": "TypeScript",
-          "alt": "TypeScript Certification"
-        },
-        "nodejs": {
-          "title": "Node.js",
-          "alt": "Node.js Developer Certification"
-        },
-        "mongodb": {
-          "title": "MongoDB",
-          "alt": "MongoDB Certification"
-        },
-        "docker": {
-          "title": "Docker",
-          "alt": "Docker Certification"
-        }
       }
     },
     "projects": {
-      "name": "Projects",
-      "pageTitle": "Projects {'|'} John Doe",
-      "heading": "My Projects",
+      "name": "My Projects",
       "viewButton": "View Project",
+      "pageTitle": "Projects {'|'} Akber Jagannath",
       "items": {
-        "project1": {
-          "title": "Project 1",
-          "description": "A Vue.js web application for task management."
+        "blockBuster": {
+          "title": "Block Buster",
+          "description": "A puzzle game made using the Godot Game engine"
         },
-        "project2": {
-          "title": "Project 2",
-          "description": "An e-commerce platform built with Vue and Node.js."
+        "portfolioTemplate": {
+          "title": "Portfolio Template",
+          "description": "A modern, fully customizable, modular portfolio website template built using Vue.js and Tailwind CSS."
         },
-        "project3": {
-          "title": "Project 3",
-          "description": "A responsive portfolio website using Vue and Tailwind CSS."
+        "openPizza": {
+          "title": "openPizza 🍕",
+          "description": "A POS webapp made using FastAPI and Vue"
         },
-        "project4": {
-          "title": "Project 4",
-          "description": "A real-time chat application with Vue and Firebase."
-        },
-        "project5": {
-          "title": "Project 5",
-          "description": "Another real-time chat application with Vue and Firebase."
+        "milkyBot": {
+          "title": "TeleBillBot 🤖",
+          "description": "An open-source, free-to-use Telegram Bot designed to make sharing sales and purchase details a breeze."
         }
       }
     },
+
     "contact": {
-      "name": "Contact",
-      "pageTitle": "Contact Me {'|'} John Doe",
-      "heading": "Contact Me",
+      "name": "Contact Me",
+      "pageTitle": "Contact Me {'|'} Akber Jagannath",
       "description": "Feel free to reach out to me via email or connect on social media!",
-      "emailButton": "Send me an email",
-      "socialNames": {
-        "linkedin": "LinkedIn",
-        "github": "GitHub",
-        "instagram": "Instagram"
-      }
+      "emailButton": "Send me an email"
     }
   },
   "settings": {
