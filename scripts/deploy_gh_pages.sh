@@ -1,4 +1,6 @@
-#!/bin/bash
+# Create a temporary directory for our deployment files
+echo -e "${PURPLE}📁 Creating temporary directory for deployment...${NC}"
+mkdir -p $TEMP_DIR#!/bin/bash
 
 # Exit script if any command fails
 set -e
@@ -54,9 +56,11 @@ cd $DOCS_DIR
 npx vitepress build
 cd ../..  # Return to project root (two levels up from docs dir)
 
-# Create a temporary directory for our deployment files
-echo -e "${PURPLE}📁 Creating temporary directory for deployment...${NC}"
-mkdir -p $TEMP_DIR
+# Clean up any existing temporary directory to avoid conflicts
+if [ -d "$TEMP_DIR" ]; then
+  echo -e "${RED}🗑️ Removing existing temporary directory...${NC}"
+  rm -rf $TEMP_DIR
+fi
 
 # Copy built files to the temporary directory
 echo -e "${PURPLE}📋 Copying main app build files...${NC}"
@@ -70,8 +74,9 @@ cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/
 # Switch to the gh-pages branch
 echo -e "${YELLOW}🔄 Switching to ${CYAN}$DEPLOY_BRANCH${YELLOW} branch...${NC}"
 if git show-ref --verify --quiet refs/heads/$DEPLOY_BRANCH; then
-  # Branch exists, switch to it
-  git checkout $DEPLOY_BRANCH
+  # Branch exists, force switch to it (discard any untracked files that might conflict)
+  echo -e "${YELLOW}⚠️ Force checking out $DEPLOY_BRANCH to avoid conflicts...${NC}"
+  git checkout -f $DEPLOY_BRANCH
   # Pull latest changes to avoid conflicts
   git pull origin $DEPLOY_BRANCH --rebase || true
 else
@@ -81,6 +86,9 @@ fi
 
 # Remove existing files to avoid conflicts (but leave .git directory)
 echo -e "${RED}🗑️ Cleaning old files from ${YELLOW}$DEPLOY_BRANCH${RED}...${NC}"
+# Use git clean to remove untracked files
+git clean -fd
+# Then remove tracked files (except .git)
 find . -maxdepth 1 ! -path . ! -path ./.git -exec rm -rf {} \;
 
 # Move the built files to the root
