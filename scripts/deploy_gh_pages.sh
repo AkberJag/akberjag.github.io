@@ -1,6 +1,31 @@
 #!/bin/bash
+# Build and deploy script for publishing frontend dist folder to GitHub Pages
+#
+# This script automates the process of building a frontend project and deploying
+# the `dist` folder to the `gh-pages` branch on GitHub for hosting via GitHub Pages.
+#
+# Key Steps:
+# 1. Verifies that the script is run from the project root and checks for the `frontend` directory.
+# 2. Navigates to the `frontend` directory and checks for `package.json` to ensure it's a Node.js project.
+# 3. Installs dependencies (if not already installed), then builds the project using `npm run build`.
+# 4. Checks if the build was successful by verifying the existence of the `dist` folder.
+# 5. Commits the new build, adds the `dist` folder to Git, and pushes it to the `gh-pages` branch using `git subtree`.
+# 6. Pushes the latest changes to the current branch of the repository.
+#
+# Exit on any error to prevent partial or broken deployment.
+# Includes helpful error messages and logs for troubleshooting.
+#
+# How to run this script:
+# 1. Ensure you're in the project root directory.
+# 2. Run the following command in the terminal:
+# bash scripts/deploy_gh_pages.sh
+#
+# This assumes the script is located in the `scripts/` folder. If it's located elsewhere,
+# adjust the path accordingly when running the script.
+#
 set -e
-echo "🚀 Starting build and deployment process..."
+
+echo "🚀 Starting enhanced build and deployment process..."
 
 # Ensure we're in the project root
 if [ ! -d "frontend" ]; then
@@ -17,6 +42,12 @@ if [ ! -f "package.json" ]; then
     exit 1
 fi
 
+# Check if docs directory exists
+if [ ! -d "docs" ]; then
+    echo "❌ Error: docs directory not found in frontend directory"
+    exit 1
+fi
+
 # Get version from package.json
 VERSION=$(node -p "require('./package.json').version")
 if [ -z "$VERSION" ]; then
@@ -30,76 +61,39 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Build the main project
-echo "🔨 Building the main project..."
+# Build the project
+echo "🔨 Building the project..."
 npm run build
 
-# Build the docs
-echo "📚 Building the documentation..."
-npm run docs:build
-
-# Check if builds were successful
+# Check if build was successful
 if [ ! -d "dist" ]; then
-    echo "❌ Main project build failed: dist directory not found"
-    exit 1
-fi
-
-DOCS_DIST_DIR="docs/.vitepress/dist"
-if [ ! -d "$DOCS_DIST_DIR" ]; then
-    echo "❌ Docs build failed: $DOCS_DIST_DIR directory not found"
+    echo "❌ Build failed: dist directory not found"
     exit 1
 fi
 
 # Go back to project root
 cd ..
 
-# Create a temporary deploy directory
-echo "📦 Preparing deployment..."
-TEMP_DEPLOY_DIR=.temp-deploy
-rm -rf $TEMP_DEPLOY_DIR
-mkdir -p $TEMP_DEPLOY_DIR
+# Force add and commit the new build
+echo "📝 Committing the new build..."
+git add frontend/dist -f
+git commit -m "🚀 deploy: Deploy version ${VERSION}" || echo "No changes to commit"
 
-# Copy main project dist
-cp -R frontend/dist/* $TEMP_DEPLOY_DIR
+echo "📦 Publishing frontend/dist folder to gh-pages branch..."
 
-# Create docs subdirectory and copy docs dist
-mkdir -p $TEMP_DEPLOY_DIR/docs
-cp -R frontend/$DOCS_DIST_DIR/* $TEMP_DEPLOY_DIR/docs
+# Get the current git branch
+current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-# Set up deployment branch with git worktree
-echo "🚀 Deploying to GitHub Pages..."
-DEPLOY_BRANCH="gh-pages"
-WORKTREE_DIR=$(mktemp -d)
-
-# Check if the deploy branch exists
-if git show-ref --verify --quiet refs/heads/$DEPLOY_BRANCH; then
-    git worktree add $WORKTREE_DIR $DEPLOY_BRANCH
+# Push the subtree
+if git subtree push --prefix frontend/dist origin gh-pages; then
+    echo "✅ Successfully deployed to GitHub Pages!"
 else
-    git worktree add --orphan $DEPLOY_BRANCH $WORKTREE_DIR
+    echo "❌ Deployment failed. If you get a 'updates were rejected' error, try running:"
+    echo "git push origin `git subtree split --prefix frontend/dist $current_branch`:gh-pages --force"
 fi
 
-# Clear existing files in worktree
-cd $WORKTREE_DIR
-find . -mindepth 1 -not -name '.git' -exec rm -rf {} + 2>/dev/null || true
-
-# Copy new build files
-cp -R $OLDPWD/$TEMP_DEPLOY_DIR/* .
-
-# Commit and push
-git add -A
-git commit -m "🚀 deploy: Deploy version ${VERSION} (main and docs)" || echo "No changes to commit"
-git push origin $DEPLOY_BRANCH --force
-
-# Cleanup
-cd $OLDPWD
-rm -rf $WORKTREE_DIR
-git worktree prune
-rm -rf $TEMP_DEPLOY_DIR
-
-echo "✅ Successfully deployed to GitHub Pages!"
-
-# Push changes to current branch (without dist)
+# Push changes to remote
 echo "🔄 Pushing changes to remote..."
-git push origin $(git rev-parse --abbrev-ref HEAD)
+git push origin $current_branch
 
-echo "✨ All done! Version ${VERSION} has been deployed to GitHub Pages and pushed to remote."
+echo "✨ All done! Version ${VERSION} has been deployed to GitHub Pages."
