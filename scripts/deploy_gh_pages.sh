@@ -1,4 +1,8 @@
 #!/bin/bash
+set -o pipefail
+
+# Exit immediately if a command exits with a non-zero status, but allow for error handling
+trap 'exit_status=$?' ERR
 
 # Colors for terminal output
 RED='\033[0;31m'
@@ -129,17 +133,62 @@ git add -A
 print_message "Committing changes to gh-pages branch..." "$GREEN"
 git commit -m "Deploy to GitHub Pages: $(date)"
 
+# Setup cleanup function to ensure we always clean up and switch back
+cleanup() {
+  # Switch back to the original branch if needed
+  if [[ "$(git branch --show-current)" != "$CURRENT_BRANCH" ]]; then
+    print_message "Switching back to $CURRENT_BRANCH branch..." "$BLUE"
+    git checkout "$CURRENT_BRANCH" || print_message "Failed to switch back to $CURRENT_BRANCH" "$RED"
+  fi
+  
+  # Clean up temporary directory
+  if [[ -d "$TEMP_DIR" ]]; then
+    print_message "Cleaning up temporary files..." "$YELLOW"
+    rm -rf "$TEMP_DIR"
+  fi
+}
+
+# Set trap to call cleanup function on exit, interrupt, or error
+trap cleanup EXIT INT TERM
+
 # Push to remote gh-pages branch
 print_message "Pushing to GitHub Pages..." "$GREEN"
-git push origin gh-pages
+if ! git push origin gh-pages; then
+  print_message "Push rejected. Attempting force push with --force-with-lease..." "$YELLOW"
+  
+  # Ask for confirmation before force pushing
+  read -p "$(echo -e "${YELLOW}Remote gh-pages branch has diverged. Force push? (y/n): ${RESET}")" -n 1 -r
+  echo
+  
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if git push --force-with-lease origin gh-pages; then
+      print_message "Force push successful." "$GREEN"
+    else
+      print_message "Force push failed. Attempting full force push..." "$YELLOW"
+      
+      read -p "$(echo -e "${RED}Try with full force push? This will overwrite remote changes completely (y/n): ${RESET}")" -n 1 -r
+      echo
+      
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if git push --force origin gh-pages; then
+          print_message "Full force push successful." "$GREEN"
+        else
+          print_message "Failed to push to GitHub Pages. Manual intervention required." "$RED"
+          print_message "You can run: git push --force origin gh-pages" "$YELLOW"
+          exit 1
+        fi
+      else
+        print_message "Deployment aborted. Your local gh-pages branch has the changes, but they weren't pushed." "$RED"
+        exit 1
+      fi
+    fi
+  else
+    print_message "Deployment aborted. Your local gh-pages branch has the changes, but they weren't pushed." "$RED"
+    print_message "You might want to pull changes first with: git pull origin gh-pages" "$YELLOW"
+    exit 1
+  fi
+fi
 
-# Switch back to the original branch
-print_message "Switching back to $CURRENT_BRANCH branch..." "$BLUE"
-git checkout "$CURRENT_BRANCH"
-
-# Clean up temporary directory
-print_message "Cleaning up temporary files..." "$YELLOW"
-rm -rf "$TEMP_DIR"
-
+# Print success message
 print_message "✅ Deployment to GitHub Pages completed successfully!" "$GREEN"
 print_message "🌐 Your site should be available at: https://$(git config --get remote.origin.url | sed -e 's/^https:\/\/github.com\///' -e 's/^git@github.com://' -e 's/\.git$//' | awk -F/ '{print $1".github.io/"$2}')/" "$GREEN"
