@@ -17,7 +17,8 @@ MAIN_BRANCH="main"  # Change this to your main branch name if different (e.g., m
 DEPLOY_BRANCH="gh-pages"
 FRONTEND_DIR="frontend"  # Your frontend code location
 BUILD_DIR="$FRONTEND_DIR/dist"  # Vue build directory
-DOCS_BUILD_DIR="docs/.vitepress/dist"  # Default Vitepress build directory
+DOCS_DIR="$FRONTEND_DIR/docs"  # Documentation directory inside frontend
+DOCS_BUILD_DIR="$DOCS_DIR/.vitepress/dist"  # Vitepress build directory
 TEMP_DIR="gh-pages-tmp"
 
 echo -e "${CYAN}🚀 Starting deployment process...${NC}"
@@ -37,11 +38,7 @@ cd $FRONTEND_DIR
 npm install
 cd ..
 
-# Install dependencies for Vitepress docs
-echo -e "${CYAN}📦 Installing documentation dependencies...${NC}"
-cd docs
-npm install
-cd ..
+# No need for separate docs installation since docs are inside frontend
 
 # Build main Vue application
 echo -e "${GREEN}🔨 Building Vue application...${NC}"
@@ -52,10 +49,10 @@ cd ..
 
 # Build Vitepress documentation
 echo -e "${GREEN}📚 Building Vitepress documentation...${NC}"
-cd docs
+cd $DOCS_DIR
 # Use npx to ensure we use the locally installed vitepress
 npx vitepress build
-cd ..
+cd ../..  # Return to project root (two levels up from docs dir)
 
 # Create a temporary directory for our deployment files
 echo -e "${PURPLE}📁 Creating temporary directory for deployment...${NC}"
