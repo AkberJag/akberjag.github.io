@@ -5,22 +5,28 @@
 # and deploying the `dist` folder to the `gh-pages` branch on GitHub for hosting via GitHub Pages.
 #
 set -euo pipefail
-echo "🚀 Starting build and deployment process..."
 
-# Define cleanup function
+# Define temp directories to be cleaned up
+TEMP_DIRS=("gh-pages-temp" "frontend/docs-dist" "frontend/dist")
+
+# Enhanced cleanup function to remove all temporary directories
 cleanup() {
     echo "🧹 Cleaning up temporary files and directories..."
-    if [ -d "gh-pages-temp" ]; then
-        rm -rf gh-pages-temp || { echo "⚠️ Warning: Failed to remove gh-pages-temp directory"; }
-    fi
-    if [ -d "frontend/docs-dist" ]; then
-        rm -rf frontend/docs-dist || { echo "⚠️ Warning: Failed to remove docs-dist directory"; }
-    fi
+    for dir in "${TEMP_DIRS[@]}"; do
+        if [ -d "$dir" ]; then
+            rm -rf "$dir" || echo "⚠️ Warning: Failed to remove $dir directory"
+        fi
+    done
     echo "✅ Cleanup complete!"
 }
 
-# Trap EXIT signal to ensure cleanup runs even if the script fails
-trap cleanup EXIT
+# Ensure cleanup happens no matter how the script exits
+trap cleanup EXIT INT TERM
+
+echo "🚀 Starting build and deployment process..."
+
+# Store current directory to return to it later
+CURRENT_DIR=$(pwd)
 
 # Ensure we're in the project root
 if [ ! -d "frontend" ]; then
@@ -37,20 +43,17 @@ if [ ! -f "package.json" ]; then
     exit 1
 fi
 
-# Get version from package.json
-VERSION=$(node -p "require('./package.json').version" || echo "latest")
+# Get version from package.json with improved error handling
+VERSION=$(node -p "try { require('./package.json').version } catch(e) { '' }" || echo "latest")
 if [ -z "$VERSION" ]; then
     echo "⚠️ Warning: Could not get version from package.json, using 'latest' instead"
     VERSION="latest"
 fi
 
-# Install dependencies if node_modules doesn't exist
+# Install dependencies if needed
 if [ ! -d "node_modules" ]; then
     echo "📦 Installing dependencies..."
-    if ! npm install; then
-        echo "❌ Error: Failed to install dependencies"
-        exit 1
-    fi
+    npm install || { echo "❌ Error: Failed to install dependencies"; exit 1; }
 fi
 
 # Check if docs directory exists
@@ -61,10 +64,7 @@ fi
 
 # Build the docs
 echo "📚 Building the documentation..."
-if ! npm run docs:build; then
-    echo "❌ Error: Docs build failed"
-    exit 1
-fi
+npm run docs:build || { echo "❌ Error: Docs build failed"; exit 1; }
 
 # Check if docs build was successful
 if [ ! -d "docs/.vitepress/dist" ]; then
@@ -74,15 +74,12 @@ fi
 
 # Copy docs dist to a separate directory for deployment
 echo "📋 Copying docs build to docs-dist directory..."
-mkdir -p docs-dist || { echo "❌ Error: Failed to create docs-dist directory"; exit 1; }
-cp -r docs/.vitepress/dist/* docs-dist/ || { echo "❌ Error: Failed to copy docs build to docs-dist"; exit 1; }
+mkdir -p docs-dist
+cp -r docs/.vitepress/dist/* docs-dist/ || { echo "❌ Error: Failed to copy docs build"; exit 1; }
 
 # Build the project
 echo "🔨 Building the main project..."
-if ! npm run build; then
-    echo "❌ Error: Build failed"
-    exit 1
-fi
+npm run build || { echo "❌ Error: Build failed"; exit 1; }
 
 # Check if build was successful
 if [ ! -d "dist" ]; then
@@ -92,11 +89,11 @@ fi
 
 # Copy docs to the dist directory
 echo "🔄 Copying documentation to dist/docs directory..."
-mkdir -p dist/docs || { echo "❌ Error: Failed to create dist/docs directory"; exit 1; }
+mkdir -p dist/docs
 cp -r docs-dist/* dist/docs/ || { echo "❌ Error: Failed to copy docs to dist/docs"; exit 1; }
 
 # Go back to project root
-cd .. || { echo "❌ Error: Failed to navigate back to project root"; exit 1; }
+cd "$CURRENT_DIR" || { echo "❌ Error: Failed to navigate back to project root"; exit 1; }
 
 # Get the current git branch
 current_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -107,20 +104,35 @@ mkdir -p gh-pages-temp
 
 # Copy the build files to the temporary directory
 echo "📋 Copying dist files to temporary directory..."
-cp -r frontend/dist/* gh-pages-temp/
+cp -r frontend/dist/* gh-pages-temp/ || { echo "❌ Error: Failed to copy dist files"; exit 1; }
 
-# Deploy to gh-pages using a more reliable approach
+# Deploy to gh-pages
 echo "📦 Publishing to gh-pages branch..."
 cd gh-pages-temp || { echo "❌ Error: Failed to navigate to gh-pages-temp"; exit 1; }
 
-# Initialize git in the temp directory
-git init
-git checkout -b gh-pages
-git add .
-git commit -m "Deploy version ${VERSION} to GitHub Pages"
+# Get repository URL with better error handling
+REPO_URL=$(git -C "$CURRENT_DIR" config --get remote.origin.url || echo "")
+if [ -z "$REPO_URL" ]; then
+    echo "❌ Error: Failed to get repository URL"
+    exit 1
+fi
+
+# Extract username and repo name from the URL with better regex handling
+REPO_PATH=$(echo "$REPO_URL" | sed -E 's/.*[:/]([^/]+\/[^/]+)(\.git)?$/\1/')
+if [ -z "$REPO_PATH" ]; then
+    echo "❌ Error: Failed to extract repo path from URL: $REPO_URL"
+    exit 1
+fi
+
+# Initialize git in the temp directory with improved error handling
+git init -q || { echo "❌ Error: Failed to initialize git repo"; exit 1; }
+git checkout -b gh-pages || { echo "❌ Error: Failed to create gh-pages branch"; exit 1; }
+git add . || { echo "❌ Error: Failed to stage files"; exit 1; }
+git commit -m "Deploy version ${VERSION} to GitHub Pages" || { echo "❌ Error: Failed to commit files"; exit 1; }
 
 # Force push to the gh-pages branch
-if git push -f git@github.com:$(git config --get remote.origin.url | sed -E 's/.*[:/](.*)\/(.*).git/\1\/\2/') gh-pages; then
+echo "🔄 Pushing to gh-pages branch..."
+if git push -f "git@github.com:${REPO_PATH}" gh-pages; then
     echo "✅ Successfully deployed to GitHub Pages!"
 else
     echo "❌ Deployment failed."
@@ -128,13 +140,10 @@ else
 fi
 
 # Go back to project root
-cd .. || { echo "❌ Error: Failed to navigate back to project root"; exit 1; }
+cd "$CURRENT_DIR" || { echo "❌ Error: Failed to navigate back to project root"; exit 1; }
 
 # Push changes to remote (excluding the dist folder)
-echo "🔄 Pushing changes to remote (excluding dist folder)..."
-if ! git push origin "$current_branch"; then
-    echo "❌ Error: Failed to push changes to remote"
-    exit 1
-fi
+echo "🔄 Pushing changes to remote (current branch: $current_branch)..."
+git push origin "$current_branch" || { echo "❌ Error: Failed to push changes to remote"; exit 1; }
 
 echo "✨ All done! Version ${VERSION} has been deployed to GitHub Pages with documentation and pushed to remote."
