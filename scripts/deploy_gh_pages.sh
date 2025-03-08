@@ -71,13 +71,17 @@ cp -r $DOCS_BUILD_DIR/* $TEMP_DIR/docs/
 echo -e "${YELLOW}🔄 Switching to ${CYAN}$DEPLOY_BRANCH${YELLOW} branch...${NC}"
 git checkout $DEPLOY_BRANCH || git checkout -b $DEPLOY_BRANCH
 
-# Remove existing files to avoid conflicts
+# Remove existing files to avoid conflicts (but leave .git directory)
 echo -e "${RED}🗑️ Cleaning old files from ${YELLOW}$DEPLOY_BRANCH${RED}...${NC}"
-find . -maxdepth 1 ! -path . ! -path ./.git ! -path ./$TEMP_DIR -exec rm -rf {} \;
+find . -maxdepth 1 ! -path . ! -path ./.git -exec rm -rf {} \;
 
 # Move the built files to the root
 echo -e "${BLUE}📦 Moving built files to root directory...${NC}"
 cp -r $TEMP_DIR/* .
+
+# Remove the temporary directory to avoid committing it
+echo -e "${RED}🗑️ Removing temporary directory from git...${NC}"
+rm -rf $TEMP_DIR
 
 # Add all files to git
 echo -e "${YELLOW}➕ Adding files to git...${NC}"
@@ -94,9 +98,5 @@ git push origin $DEPLOY_BRANCH
 # Switch back to the original branch
 echo -e "${BLUE}🔄 Switching back to ${YELLOW}$CURRENT_BRANCH${BLUE} branch...${NC}"
 git checkout $CURRENT_BRANCH
-
-# Cleanup
-echo -e "${GREEN}🧹 Cleaning up temporary files...${NC}"
-rm -rf $TEMP_DIR
 
 echo -e "${GREEN}✅ Deployment complete! Your site should be available soon at your GitHub Pages URL.${NC}"
