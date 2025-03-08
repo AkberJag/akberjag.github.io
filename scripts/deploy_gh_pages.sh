@@ -20,24 +20,24 @@ print_message() {
 
 # Store the start directory
 START_DIR=$(pwd)
-TEMP_DIR=""
-CURRENT_BRANCH=""
+BUILD_TEMP_DIR=""
+WORKTREE_DIR=""
 
-# Setup cleanup function to ensure we always clean up and switch back
+# Setup cleanup function to ensure we always clean up
 cleanup() {
   # Return to start directory
   cd "$START_DIR" || print_message "Failed to return to start directory" "$RED"
   
-  # Switch back to the original branch if needed
-  if [[ -n "$CURRENT_BRANCH" && "$(git branch --show-current)" != "$CURRENT_BRANCH" ]]; then
-    print_message "Switching back to $CURRENT_BRANCH branch..." "$BLUE"
-    git checkout "$CURRENT_BRANCH" || print_message "Failed to switch back to $CURRENT_BRANCH" "$RED"
+  # Clean up temporary build directory
+  if [[ -n "$BUILD_TEMP_DIR" && -d "$BUILD_TEMP_DIR" ]]; then
+    print_message "Cleaning up temporary build files..." "$YELLOW"
+    rm -rf "$BUILD_TEMP_DIR"
   fi
   
-  # Clean up temporary directory
-  if [[ -n "$TEMP_DIR" && -d "$TEMP_DIR" ]]; then
-    print_message "Cleaning up temporary files..." "$YELLOW"
-    rm -rf "$TEMP_DIR"
+  # Remove git worktree if it exists
+  if [[ -n "$WORKTREE_DIR" && -d "$WORKTREE_DIR" ]]; then
+    print_message "Removing git worktree..." "$YELLOW"
+    git worktree remove --force "$WORKTREE_DIR" 2>/dev/null || rm -rf "$WORKTREE_DIR"
   fi
 }
 
@@ -62,7 +62,7 @@ if [ ! -d "frontend" ]; then
   exit 1
 fi
 
-# Store current branch name
+# Get current branch name
 CURRENT_BRANCH=$(git branch --show-current)
 print_message "Current branch: $CURRENT_BRANCH" "$BLUE"
 
@@ -72,9 +72,36 @@ if [[ -n $(git status --porcelain) ]]; then
   exit 1
 fi
 
+# Define the target branch for GitHub Pages
+TARGET_BRANCH="gh-pages"
+print_message "Target branch: $TARGET_BRANCH" "$BLUE"
+
 # Create a temporary directory for the build
-TEMP_DIR=$(mktemp -d)
-print_message "Created temporary directory for build: $TEMP_DIR" "$BLUE"
+BUILD_TEMP_DIR=$(mktemp -d)
+print_message "Created temporary directory for build: $BUILD_TEMP_DIR" "$BLUE"
+
+# Create another temporary directory for the git worktree
+WORKTREE_DIR=$(mktemp -d)
+print_message "Created temporary directory for git worktree: $WORKTREE_DIR" "$BLUE"
+
+# Check if the target branch exists
+if ! git show-ref --verify --quiet refs/heads/$TARGET_BRANCH; then
+  print_message "$TARGET_BRANCH branch doesn't exist yet. Creating it..." "$YELLOW"
+  git checkout --orphan $TARGET_BRANCH
+  git rm -rf .
+  touch .nojekyll
+  git add .nojekyll
+  git commit -m "Initial $TARGET_BRANCH branch commit"
+  git push origin $TARGET_BRANCH
+  git checkout "$CURRENT_BRANCH"
+fi
+
+# Create git worktree for the target branch
+print_message "Creating git worktree for $TARGET_BRANCH branch..." "$PURPLE"
+if ! git worktree add "$WORKTREE_DIR" $TARGET_BRANCH; then
+  print_message "Failed to create git worktree." "$RED"
+  exit 1
+fi
 
 # Install dependencies in the frontend directory
 print_message "Installing dependencies..." "$YELLOW"
@@ -132,17 +159,17 @@ print_message "Looking for Vitepress build output..." "$CYAN"
 
 DOCS_COPIED=false
 
-# Create docs directory in temp dir
-mkdir -p "$TEMP_DIR/docs"
+# Create docs directory in build temp dir
+mkdir -p "$BUILD_TEMP_DIR/docs"
 
 # Check common Vitepress output locations
 if [ -d "docs/.vitepress/dist" ]; then
   print_message "Found Vitepress docs at docs/.vitepress/dist" "$GREEN"
-  cp -r docs/.vitepress/dist/* "$TEMP_DIR/docs/"
+  cp -r docs/.vitepress/dist/* "$BUILD_TEMP_DIR/docs/"
   DOCS_COPIED=true
 elif [ -d ".vitepress/dist" ]; then
   print_message "Found Vitepress docs at .vitepress/dist" "$GREEN"
-  cp -r .vitepress/dist/* "$TEMP_DIR/docs/"
+  cp -r .vitepress/dist/* "$BUILD_TEMP_DIR/docs/"
   DOCS_COPIED=true
 else
   # Try to search for the dist directory
@@ -151,7 +178,7 @@ else
   
   if [ -n "$VITEPRESS_DIST" ]; then
     print_message "Found Vitepress docs at $VITEPRESS_DIST" "$GREEN"
-    cp -r "$VITEPRESS_DIST"/* "$TEMP_DIR/docs/"
+    cp -r "$VITEPRESS_DIST"/* "$BUILD_TEMP_DIR/docs/"
     DOCS_COPIED=true
   else
     print_message "No built Vitepress docs found. Copying raw docs files instead..." "$YELLOW"
@@ -159,7 +186,7 @@ else
     # Copy raw docs if they exist
     if [ -d "docs" ]; then
       print_message "Copying raw docs directory..." "$YELLOW"
-      cp -r docs "$TEMP_DIR/"
+      cp -r docs "$BUILD_TEMP_DIR/"
       DOCS_COPIED=true
     fi
   fi
@@ -169,46 +196,38 @@ if [ "$DOCS_COPIED" = false ]; then
   print_message "Warning: Could not find any docs to copy." "$YELLOW"
 fi
 
-# Copy Vue build to temp directory
+# Copy Vue build to build temp directory
 if [ -d "dist" ]; then
-  print_message "Copying Vue build files to temp directory..." "$CYAN"
-  cp -r dist/* "$TEMP_DIR/"
+  print_message "Copying Vue build files to build temp directory..." "$CYAN"
+  cp -r dist/* "$BUILD_TEMP_DIR/"
 else
   print_message "Error: Vue dist directory not found. Build may have failed." "$RED"
   exit 1
 fi
 
-# Return to project root
-cd "$START_DIR" || exit 1
+# Navigate to worktree directory
+cd "$WORKTREE_DIR" || exit 1
 
-# Always use gh-pages branch
-TARGET_BRANCH="gh-pages"
-print_message "Target branch: $TARGET_BRANCH" "$BLUE"
-
-# Switch to target branch (create if it doesn't exist)
-print_message "Switching to $TARGET_BRANCH branch..." "$PURPLE"
-if git show-ref --verify --quiet refs/heads/$TARGET_BRANCH; then
-  git checkout $TARGET_BRANCH
-else
-  git checkout --orphan $TARGET_BRANCH
-  git rm -rf .
-  touch .nojekyll # Ensure GitHub doesn't process files with Jekyll
-fi
-
-# Remove everything except .git folder and .nojekyll
-print_message "Cleaning $TARGET_BRANCH branch..." "$PURPLE"
-find . -maxdepth 1 ! -name '.git' ! -name '.' ! -name '.nojekyll' -exec rm -rf {} \;
-
-# Copy build files from temp directory
-print_message "Copying build files to $TARGET_BRANCH branch..." "$CYAN"
-cp -r "$TEMP_DIR"/* .
+# Remove everything in the worktree except .git
+print_message "Cleaning $TARGET_BRANCH branch in worktree..." "$PURPLE"
+find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} \;
 
 # Add a .nojekyll file to bypass GitHub Pages Jekyll processing
 touch .nojekyll
 
+# Copy build files from build temp directory
+print_message "Copying build files to $TARGET_BRANCH branch worktree..." "$CYAN"
+cp -r "$BUILD_TEMP_DIR"/* .
+
 # Stage all files
 print_message "Staging files for commit..." "$GREEN"
 git add -A
+
+# Check if there are changes to commit
+if [[ -z $(git status --porcelain) ]]; then
+  print_message "No changes to commit. Deployment skipped." "$YELLOW"
+  exit 0
+fi
 
 # Commit changes
 print_message "Committing changes to $TARGET_BRANCH branch..." "$GREEN"
@@ -237,7 +256,7 @@ if ! git push origin $TARGET_BRANCH; then
           print_message "Full force push successful." "$GREEN"
         else
           print_message "Failed to push to GitHub Pages. Manual intervention required." "$RED"
-          print_message "You can run: git push --force origin $TARGET_BRANCH" "$YELLOW"
+          print_message "You can manually run: git push --force origin $TARGET_BRANCH" "$YELLOW"
           exit 1
         fi
       else
@@ -252,6 +271,8 @@ if ! git push origin $TARGET_BRANCH; then
   fi
 fi
 
+# Return to project root
+cd "$START_DIR" || exit 1
 
 # Print success message
 print_message "✅ Deployment to GitHub Pages completed successfully!" "$GREEN"
