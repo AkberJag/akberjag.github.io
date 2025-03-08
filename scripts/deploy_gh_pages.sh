@@ -252,5 +252,6 @@ if ! git push origin $TARGET_BRANCH; then
   fi
 fi
 
+
 # Print success message
 print_message "✅ Deployment to GitHub Pages completed successfully!" "$GREEN"
