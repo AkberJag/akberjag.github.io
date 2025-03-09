@@ -10,7 +10,7 @@ import TheCTA from '../components/sections/TheCTA.vue'
 
 const isScrolled = ref(false)
 const activeSection = ref('hero')
-const featureName = 'testFeature'
+const featureName = 'TeleBillBot'
 const { t } = useFeatureTranslations('products/TeleBillBot')
 
 // Use computed property for section titles to ensure they're reactive
