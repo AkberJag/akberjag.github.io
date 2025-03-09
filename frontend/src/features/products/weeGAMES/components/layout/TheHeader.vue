@@ -16,7 +16,7 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['toggleMenu', 'updateActiveSection'])
+const emit = defineEmits(['toggleMenu', 'updateActiveSection', 'startScrolling'])
 
 const navItems = [
   { label: 'Home', href: '#home', section: 'home' },
@@ -27,11 +27,14 @@ const navItems = [
 const scrollToSection = sectionId => {
   const element = document.getElementById(sectionId)
   if (element) {
+    // Emit event to parent to handle scroll locking
+    emit('startScrolling', sectionId)
+
+    // Perform the scroll
     window.scrollTo({
       top: element.offsetTop - 65,
       behavior: 'smooth',
     })
-    emit('updateActiveSection', sectionId)
   }
 }
 
@@ -48,7 +51,8 @@ const scrollToSectionAndCloseMenu = sectionId => {
   }" role="banner">
     <div class="container mx-auto px-6 flex items-center justify-between">
       <!-- Logo -->
-      <a href="#home" class="flex items-center focus:outline-none rounded-md" aria-label="weeGAMES home">
+      <a href="#home" class="flex items-center focus:outline-none rounded-md" aria-label="weeGAMES home"
+        @click.prevent="scrollToSection('home')">
         <div
           class="bg-accent rounded-md -rotate-6 hover:rotate-[360deg] flex items-center justify-center mr-3 transition-all duration-500"
           :class="scrolled ? 'size-8' : 'size-10'">
@@ -67,7 +71,7 @@ const scrollToSectionAndCloseMenu = sectionId => {
             ? 'text-gray-900 font-medium'
             : 'text-gray-600 hover:text-gray-900'
             " :aria-current="activeSection === item.section ? 'page' : undefined"
-          @click.prevent="scrollToSection(item.href.substring(1))">
+          @click.prevent="scrollToSection(item.section)">
           {{ item.label }}
           <span v-if="activeSection === item.section"
             class="absolute -bottom-1 left-0 w-full h-0.5 bg-accent transform transition-transform duration-300"></span>
@@ -99,7 +103,7 @@ const scrollToSectionAndCloseMenu = sectionId => {
           <a v-for="item in navItems" :key="item.href" :href="item.href"
             class="text-xl font-medium py-2 transition-colors focus:outline-none rounded" :class="activeSection === item.section ? 'text-gray-900' : 'text-gray-600'
               " :aria-current="activeSection === item.section ? 'page' : undefined"
-            @click.prevent="scrollToSectionAndCloseMenu(item.href.substring(1))">
+            @click.prevent="scrollToSectionAndCloseMenu(item.section)">
             {{ item.label }}
           </a>
           <a href="https://play.google.com/store/apps/dev?id=8307618757460048400" target="_blank"
