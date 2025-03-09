@@ -1,0 +1,121 @@
+:root {
+  --vp-c-bg: rgba(255, 255, 255, 0.8);
+  --vp-c-bg-soft: rgba(255, 255, 255, 0.9);
+  --vp-c-text-soft: #4a5568;
+  --vp-c-border: rgba(0, 0, 0, 0.1);
+  --vp-c-brand-1: #42b883;
+  --vp-c-brand-2: #34495e;
+}
+
+.dark {
+  --vp-c-bg: rgba(26, 32, 44, 0.8);
+  --vp-c-bg-soft: rgba(26, 32, 44, 0.9);
+  --vp-c-text-soft: #cbd5e0;
+  --vp-c-border: rgba(255, 255, 255, 0.1);
+}
+
+
+
+.VPContent.is-home::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg,
+      rgba(66, 184, 131, 0.2) 0%,
+      rgba(52, 73, 94, 0.2) 50%,
+      rgba(66, 184, 131, 0.2) 100%);
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+  z-index: 0;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.VPFeature {
+  background: var(--vp-c-bg-soft);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(66, 184, 131, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.VPFeature:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(66, 184, 131, 0.2);
+  border-color: rgba(66, 184, 131, 0.3);
+}
+
+.VPFeature::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+}
+
+.VPFeature:hover::after {
+  opacity: 0.1;
+}
+
+.VPButton.brand {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.VPButton.brand::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle, var(--vp-c-brand-2), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+.VPButton.brand:hover {
+  background-color: var(--vp-c-brand-1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(66, 184, 131, 0.4);
+}
+
+.VPButton.brand:hover::before {
+  opacity: 0.3;
+}
+
+/* Enhance the header with a subtle backdrop filter */
+.VPNav:not(:has(.VPNavBar.top)) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Add a subtle hover effect to navigation items */
+.VPNavBarMenuLink:hover,
+.VPNavBarMenuGroup:hover .title
+ {
+  color: var(--vp-c-brand-1);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+.VPNavBarTitle.has-sidebar .title {
+  border: none;
+}
+
+.VPNavBarTitle{
+  display: none;
+}
