@@ -247,22 +247,29 @@ onUnmounted(() => {
               </button>
 
               <!-- Desktop popover - attached directly to the button's parent div -->
-              <div v-if="productsOpen && !isMobile" ref="popoverRef"
-                class="products-popover absolute right-0 rounded-2xl shadow-xl bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50 overflow-hidden min-w-64 w-full"
-                :class="shouldShowAbove ? 'bottom-full mb-2' : 'top-full mt-2'">
-                <div class="py-2 space-y-4" role="menu" aria-orientation="vertical" aria-labelledby="products-menu">
-                  <div class="space-y-3 max-h-60 overflow-y-auto">
-                    <a v-for="product in products" :key="product.name" :href="product.url" target="_blank"
-                      rel="noopener noreferrer"
-                      class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                      <div class="flex items-start justify-between">
-                        <h4 class="font-medium text-gray-900 dark:text-white">{{ t(product.name) }}</h4>
-                        <ExternalLink class="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
-                      </div>
-                    </a>
+              <Transition enter-active-class="transition duration-300 ease-out"
+                enter-from-class="transform -translate-y-4 opacity-0"
+                enter-to-class="transform translate-y-0 opacity-100"
+                leave-active-class="transition duration-200 ease-in"
+                leave-from-class="transform translate-y-0 opacity-100"
+                leave-to-class="transform -translate-y-4 opacity-0">
+                <div v-if="productsOpen && !isMobile" ref="popoverRef"
+                  class="products-popover absolute right-0 rounded-2xl shadow-xl bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50 overflow-hidden min-w-64 w-full"
+                  :class="shouldShowAbove ? 'bottom-full mb-2' : 'top-full mt-2'">
+                  <div class="py-2 space-y-4" role="menu" aria-orientation="vertical" aria-labelledby="products-menu">
+                    <div class="space-y-3 max-h-60 overflow-y-auto">
+                      <a v-for="product in products" :key="product.name" :href="product.url" target="_blank"
+                        rel="noopener noreferrer"
+                        class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <div class="flex items-start justify-between">
+                          <h4 class="font-medium text-gray-900 dark:text-white">{{ t(product.name) }}</h4>
+                          <ExternalLink class="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+                        </div>
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Transition>
             </div>
           </div>
         </div>
