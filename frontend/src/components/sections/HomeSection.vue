@@ -282,7 +282,7 @@ onUnmounted(() => {
       <Transition enter-active-class="transition-opacity duration-300 ease-out" enter-from-class="opacity-0"
         enter-to-class="opacity-100" leave-active-class="transition-opacity duration-200 ease-in"
         leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="productsOpen && isMobile" class="products-backdrop fixed inset-0 bg-black bg-opacity-50 z-40"
+        <div v-if="productsOpen && isMobile" class="products-backdrop fixed inset-0 bg-black bg-opacity-50 z-[51]"
           @click="closeProducts">
         </div>
       </Transition>
@@ -293,7 +293,7 @@ onUnmounted(() => {
         leave-active-class="transition-transform duration-200 ease-in" leave-from-class="transform translate-y-0"
         leave-to-class="transform translate-y-full">
         <div v-if="productsOpen && isMobile"
-          class="products-action-sheet fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl z-50 overflow-hidden max-h-[85vh] flex flex-col">
+          class="products-action-sheet fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl z-[52] overflow-hidden max-h-[85vh] flex flex-col">
           <!-- Drag handle -->
           <div class="pt-2 pb-1 flex justify-center">
             <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
