@@ -13,12 +13,6 @@ const routes = [
         name: 'portfolio-section',
         component: () => import('@/views/PortfolioView.vue'),
       },
-      {
-        path: 'i18nexample',
-        name: 'i18n-example',
-        component: () =>
-          import('@/features/example/views/ExampleComponent.vue'),
-      },
     ],
   },
 
