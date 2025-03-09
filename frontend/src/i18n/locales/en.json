@@ -14,7 +14,11 @@
       "title": "Your friendly neighborhood Python developer 🐍",
       "subtitle": "and an Amateur radio operator 📡",
       "itsMe": "It's me",
-      "getInTouch": "Get in Touch"
+      "getInTouch": "Get in Touch",
+      "products": {
+        "title": "Products",
+        "items": ["TeleBill Bot", "Wee Games"]
+      }
     },
     "about": {
       "name": "About",
