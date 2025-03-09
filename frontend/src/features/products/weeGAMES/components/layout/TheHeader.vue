@@ -1,3 +1,46 @@
+<script setup>
+import { Menu as MenuIcon, X as XIcon, Play as PlayIcon } from 'lucide-vue-next'
+
+defineProps({
+  activeSection: {
+    type: String,
+    default: 'home',
+  },
+  scrolled: {
+    type: Boolean,
+    default: false,
+  },
+  mobileMenuOpen: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const emit = defineEmits(['toggleMenu', 'updateActiveSection'])
+
+const navItems = [
+  { label: 'Home', href: '#home', section: 'home' },
+  { label: 'Games', href: '#games', section: 'games' },
+  { label: 'Contact', href: '#contact', section: 'contact' },
+]
+
+const scrollToSection = sectionId => {
+  const element = document.getElementById(sectionId)
+  if (element) {
+    window.scrollTo({
+      top: element.offsetTop - 65,
+      behavior: 'smooth',
+    })
+    emit('updateActiveSection', sectionId)
+  }
+}
+
+const scrollToSectionAndCloseMenu = sectionId => {
+  scrollToSection(sectionId)
+  emit('toggleMenu')
+}
+</script>
+
 <template>
   <header class="fixed top-0 w-full z-50 transition-all duration-300" :class="{
     'py-6 bg-white/90 backdrop-blur-md': !scrolled,
@@ -72,49 +115,7 @@
   </div>
 </template>
 
-<script setup>
-import { defineProps, defineEmits } from 'vue'
-import { Menu as MenuIcon, X as XIcon, Play as PlayIcon } from 'lucide-vue-next'
 
-const props = defineProps({
-  activeSection: {
-    type: String,
-    default: 'home',
-  },
-  scrolled: {
-    type: Boolean,
-    default: false,
-  },
-  mobileMenuOpen: {
-    type: Boolean,
-    default: false,
-  },
-})
-
-const emit = defineEmits(['toggleMenu', 'updateActiveSection'])
-
-const navItems = [
-  { label: 'Home', href: '#home', section: 'home' },
-  { label: 'Games', href: '#games', section: 'games' },
-  { label: 'Contact', href: '#contact', section: 'contact' },
-]
-
-const scrollToSection = sectionId => {
-  const element = document.getElementById(sectionId)
-  if (element) {
-    window.scrollTo({
-      top: element.offsetTop - 65,
-      behavior: 'smooth',
-    })
-    emit('updateActiveSection', sectionId)
-  }
-}
-
-const scrollToSectionAndCloseMenu = sectionId => {
-  scrollToSection(sectionId)
-  emit('toggleMenu')
-}
-</script>
 
 <style scoped>
 @keyframes fadeIn {
