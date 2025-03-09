@@ -1,0 +1,148 @@
+{
+  "title": "TeleBill Bot",
+  "navigation": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "faq": "FAQ"
+  },
+  "hero": {
+    "title": "Manage Bills & Connect with Customers",
+    "subtitle": "A powerful Telegram bot for bill management, customer communication, and more.",
+    "buttons": {
+      "getStarted": "Get Started"
+    },
+    "messages": {
+      "bot": {
+        "subTitle": "Your billing assistant (this is an example)",
+        "initialPrompt": "To start this service, send /start",
+        "welcome": "Hello {user}",
+        "billReady": "APCOS\nBill Example \n\n{date} AM ☀️\n\nUser 123\n\nQty: 18 Liters\nCLR: 27\nFAT: 3.8\nSNF: 8\nRs: ₹ 41.08\nTotal: ₹ 739.44",
+        "usageBreakdown": "Old bill details, from {from} to {to}. AM",
+        "specialOffer": "📣 An example of an advertisement/message that can be sent to everyone or selected users 📣",
+        "alreadyRegistered": "👋 Welcome back 🤗  \nYou have already registered for this service ✅\n\nVisit APCOS for more assistance."
+      }
+    }
+  },
+  "features": {
+    "title": "Key Features",
+    "items": [
+      {
+        "title": "Bill Management",
+        "description": "Supports bills from Splash, NIC old and NIC new. Send weekly or monthly bill/balance updates to customers."
+      },
+      {
+        "title": "Customer Communication",
+        "description": "Send custom messages to all or selected users. Deliver ads and important announcements via Telegram or SMS."
+      },
+      {
+        "title": "Role-Based Access",
+        "description": "Add different users based on roles. Control who can access what features and information."
+      },
+      {
+        "title": "SMS Integration",
+        "description": "Send bills via SMS at just ₹0.20 per message. No charge for Telegram messages."
+      },
+      {
+        "title": "Scheduled Updates",
+        "description": "Set up weekly or monthly bill/balance updates to be sent automatically to your customers."
+      },
+      {
+        "title": "Targeted Advertising",
+        "description": "Send ads and promotional messages to all users or target specific customer segments."
+      }
+    ]
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that works best for your business. All plans include the core features. SMS charges (₹0.20 per message) are billed separately.",
+    "note": "Note: SMS charges (₹0.20 per message) are billed separately and are not included in the plan prices. There is no charge for Telegram messages.",
+    "customPriceMessage": "If you're not happy with the price or if you're a very small business, contact us for a custom price.",
+    "plans": {
+      "commonFeatures": [
+        "Free updates during term",
+        "Support within 24 hours",
+        "Cloud hosted solution",
+        "Add new features for free*",
+        "Option to self-host after term"
+      ],
+      "selfHosted": {
+        "title": "Self-Hosted",
+        "duration": "one-time",
+        "description": "Host on your own machine with full control.",
+        "features": [
+          "Free updates for 3 years",
+          "Support within 7 days",
+          "Self-hosted on your machine",
+          "Extra charge for custom features",
+          "No support for SMS, only telegram message"
+        ]
+      },
+      "annual": {
+        "title": "Annual Plan",
+        "label": "MOST POPULAR",
+        "duration": "/year",
+        "description": "Best value for businesses of all sizes.",
+        "features": []
+      },
+      "threeYear": {
+        "title": "3-Year Plan",
+        "duration": "/year",
+        "description": "Best long-term value with maximum savings.",
+        "features": []
+      }
+    },
+    "button": "Get Started"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "items": [
+      {
+        "question": "What bill formats are supported?",
+        "answer": "Our bot supports bills from Splash, NIC old, and NIC new formats. You can send weekly or monthly bill/balance updates to your customers."
+      },
+      {
+        "question": "How much do SMS messages cost?",
+        "answer": "SMS messages are charged at ₹0.20 per message. This is billed separately from your subscription plan. Telegram messages are completely free."
+      },
+      {
+        "question": "What happens after my subscription ends?",
+        "answer": "After your subscription term ends, you have the option to self-host the bot on your local machine without any additional charges. The same options apply as our one-time purchase plan."
+      },
+      {
+        "question": "What kind of support is included?",
+        "answer": "The annual and 3-year plans include support with responses within 24 hours. The one-time purchase plan includes support with responses within 7 days. All plans include free updates during their respective terms."
+      },
+      {
+        "question": "How does the Telegram bot work?",
+        "answer": "Our Telegram bot connects to your business systems and allows you to send bills, messages, and manage users directly through the Telegram interface."
+      },
+      {
+        "question": "Do customers need to have Telegram to receive bills?",
+        "answer": "No, customers without Telegram can receive bills via SMS. SMS messages are charged separately at ₹0.20 per message sent."
+      },
+      {
+        "question": "Can I send promotional messages to my customers?",
+        "answer": "Yes, you can send advertisements and promotional messages to all users or target specific customer segments. (only on Telegram)"
+      },
+      {
+        "question": "How do I add users with different roles?",
+        "answer": "Through the admin panel, you can add users and assign them specific roles with customized permissions based on their responsibilities."
+      },
+      {
+        "question": "How do I get started?",
+        "answer": "Simply click the 'Get Started' button, choose your subscription plan, and follow our setup guide to connect the bot to your Telegram account."
+      },
+      {
+        "question": "How are SMS charges billed?",
+        "answer": "SMS charges are not included in the subscription price. They are billed separately at ₹0.20 per SMS sent, you can purchase 1,000 to 5,00,000 at once. (1 SMS = 153 English characters, including spaces)"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to Streamline Your Billing Process?",
+    "subtitle": "Join hundreds of businesses that are saving time and improving customer communication with our Telegram bot.",
+    "buttons": {
+      "getStarted": "Get Started Today"
+    }
+  }
+}

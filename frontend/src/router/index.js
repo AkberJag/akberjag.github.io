@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import i18n, { SUPPORTED_LOCALES } from '@/i18n'
 
+import productRoutes from '@/features/products/product-routes'
+
 // Helper function for language validation
 const isValidLocale = lang => SUPPORTED_LOCALES.includes(lang)
 
@@ -13,6 +15,7 @@ const routes = [
         name: 'portfolio-section',
         component: () => import('@/views/PortfolioView.vue'),
       },
+      ...productRoutes,
     ],
   },
 
