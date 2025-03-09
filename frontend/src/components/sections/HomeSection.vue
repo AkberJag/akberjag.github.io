@@ -30,8 +30,9 @@ const showContent = ref(false)
 // Products popup state
 const productsOpen = ref(false)
 const productsButtonRef = ref(null)
-const popupPosition = ref({ top: 0, left: 0 })
+const popoverRef = ref(null)
 const isMobile = ref(false)
+const shouldShowAbove = ref(false)
 
 // Animation control and timing
 let cursorInterval = null
@@ -131,46 +132,26 @@ const checkIsMobile = () => {
   isMobile.value = window.innerWidth < 768
 }
 
-const updatePopupPosition = () => {
-  if (!productsButtonRef.value) return
+const checkSpaceBelow = () => {
+  if (!productsButtonRef.value) return false
 
-  checkIsMobile()
+  const buttonRect = productsButtonRef.value.getBoundingClientRect()
+  const viewportHeight = window.innerHeight
+  const spaceBelow = viewportHeight - buttonRect.bottom
 
-  if (!isMobile.value) {
-    const buttonRect = productsButtonRef.value.getBoundingClientRect()
-    const width = Math.max(buttonRect.width, 280)
+  // Approximate height of the popup
+  const popupHeight = Math.min(products.length * 50 + 40, 200)
 
-    let left = buttonRect.left
-    // Ensure popup stays within viewport horizontally
-    if (left + width > window.innerWidth - 16) {
-      left = window.innerWidth - width - 16
-    }
-    if (left < 16) {
-      left = 16
-    }
-
-    // Calculate available space below the button
-    const spaceBelow = window.innerHeight - buttonRect.bottom - 16 // 16px margin
-    const popupHeight = 200 // Approximate height of the popup, adjust as needed
-
-    let top = buttonRect.bottom + window.scrollY + 8 // Default position below the button
-
-    // If there's not enough space below, show the popup above the button
-    if (spaceBelow < popupHeight) {
-      top = buttonRect.top + window.scrollY - popupHeight + 50 // 8px margin
-    }
-
-    popupPosition.value = {
-      top,
-      left,
-      width
-    }
-  }
+  // Check if there's enough space below (with some margin)
+  return spaceBelow < (popupHeight + 20)
 }
 
 const toggleProducts = () => {
   checkIsMobile()
-  updatePopupPosition()
+
+  // Check available space and decide where to position the popup
+  shouldShowAbove.value = checkSpaceBelow()
+
   productsOpen.value = !productsOpen.value
 
   // Prevent scrolling when popup is open on mobile
@@ -186,6 +167,7 @@ const closeProducts = () => {
 const closeProductsOnOutsideClick = (event) => {
   if (!productsOpen.value || !productsButtonRef.value) return
 
+  // Check if clicking outside the button and popup
   const popover = document.querySelector('.products-popover')
   const backdrop = document.querySelector('.products-backdrop')
 
@@ -198,12 +180,7 @@ const closeProductsOnOutsideClick = (event) => {
 
 const handleResize = () => {
   checkIsMobile()
-  if (productsOpen.value && !isMobile.value) {
-    updatePopupPosition()
-  }
-}
-
-const handleScroll = () => {
+  // Close popup on desktop resize for simplicity
   if (productsOpen.value && !isMobile.value) {
     closeProducts()
   }
@@ -218,7 +195,6 @@ onMounted(() => {
 
   document.addEventListener('click', closeProductsOnOutsideClick)
   window.addEventListener('resize', handleResize)
-  window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
@@ -228,7 +204,6 @@ onUnmounted(() => {
   document.body.style.overflow = ''
   document.removeEventListener('click', closeProductsOnOutsideClick)
   window.removeEventListener('resize', handleResize)
-  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
@@ -261,19 +236,40 @@ onUnmounted(() => {
               {{ t('sections.home.getInTouch') }}
             </router-link>
 
-            <button ref="productsButtonRef"
-              class="inline-flex items-center px-8 py-3 font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border-2 border-primary-500 text-primary-600 hover:bg-primary-50 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-900/20"
-              @click.stop="toggleProducts">
-              <span>{{ t('sections.home.products.title') }}</span>
-              <ChevronRight :class="{ 'rotate-90': productsOpen }"
-                class="size-5 ml-2 transition-transform duration-300" />
-            </button>
+            <!-- Products button with relative positioning for popup attachment -->
+            <div class="relative">
+              <button ref="productsButtonRef"
+                class="inline-flex items-center px-8 py-3 font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border-2 border-primary-500 text-primary-600 hover:bg-primary-50 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-900/20"
+                @click.stop="toggleProducts">
+                <span>{{ t('sections.home.products.title') }}</span>
+                <ChevronRight :class="{ 'rotate-90': productsOpen }"
+                  class="size-5 ml-2 transition-transform duration-300" />
+              </button>
+
+              <!-- Desktop popover - attached directly to the button's parent div -->
+              <div v-if="productsOpen && !isMobile" ref="popoverRef"
+                class="products-popover absolute right-0 rounded-2xl shadow-xl bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50 overflow-hidden min-w-64 w-full"
+                :class="shouldShowAbove ? 'bottom-full mb-2' : 'top-full mt-2'">
+                <div class="py-2 space-y-4" role="menu" aria-orientation="vertical" aria-labelledby="products-menu">
+                  <div class="space-y-3 max-h-60 overflow-y-auto">
+                    <a v-for="product in products" :key="product.name" :href="product.url" target="_blank"
+                      rel="noopener noreferrer"
+                      class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                      <div class="flex items-start justify-between">
+                        <h4 class="font-medium text-gray-900 dark:text-white">{{ t(product.name) }}</h4>
+                        <ExternalLink class="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Popups (Teleported to body) -->
+    <!-- Popups (Teleported to body) - Only for mobile view -->
     <Teleport to="body">
       <!-- Mobile backdrop -->
       <Transition enter-active-class="transition-opacity duration-300 ease-out" enter-from-class="opacity-0"
@@ -281,34 +277,6 @@ onUnmounted(() => {
         leave-from-class="opacity-100" leave-to-class="opacity-0">
         <div v-if="productsOpen && isMobile" class="products-backdrop fixed inset-0 bg-black bg-opacity-50 z-40"
           @click="closeProducts">
-        </div>
-      </Transition>
-
-      <!-- Desktop popover -->
-      <Transition enter-active-class="transition duration-300 ease-out"
-        enter-from-class="transform -translate-y-4 opacity-0" enter-to-class="transform translate-y-0 opacity-100"
-        leave-active-class="transition duration-200 ease-in" leave-from-class="transform translate-y-0 opacity-100"
-        leave-to-class="transform -translate-y-4 opacity-0">
-        <div v-if="productsOpen && !isMobile"
-          class="products-popover fixed rounded-2xl shadow-xl bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50 overflow-hidden"
-          :style="{
-            top: `${popupPosition.top}px`,
-            left: `${popupPosition.left}px`,
-            width: `${popupPosition.width}px`,
-            maxWidth: 'calc(100vw - 32px)',
-          }" role="menu" aria-orientation="vertical" aria-labelledby="products-menu">
-          <div class="py-2 space-y-4" role="none">
-            <div class="space-y-3 max-h-[60vh] overflow-y-auto">
-              <a v-for="product in products" :key="product.name" :href="product.url" target="_blank"
-                rel="noopener noreferrer"
-                class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                <div class="flex items-start justify-between">
-                  <h4 class="font-medium text-gray-900 dark:text-white">{{ t(product.name) }}</h4>
-                  <ExternalLink class="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
-                </div>
-              </a>
-            </div>
-          </div>
         </div>
       </Transition>
 
