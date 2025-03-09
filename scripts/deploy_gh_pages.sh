@@ -13,10 +13,53 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 RESET='\033[0m' # Reset color
 
+# Function to display help message
+show_help() {
+  echo -e "${BLUE}Usage:${RESET} ./$(basename "$0") [OPTIONS]"
+  echo
+  echo -e "${YELLOW}Description:${RESET}"
+  echo "  This script builds and deploys a Vue application to GitHub Pages."
+  echo "  It handles both the main application and Vitepress documentation if present."
+  echo
+  echo -e "${YELLOW}Options:${RESET}"
+  echo "  -h, --help     Display this help message and exit"
+  echo
+  echo -e "${YELLOW}Requirements:${RESET}"
+  echo "  - Git and npm must be installed"
+  echo "  - Must be run from the project root directory (containing the 'frontend' folder)"
+  echo "  - Working directory must be clean (no uncommitted changes)"
+  echo
+  echo -e "${YELLOW}Process:${RESET}"
+  echo "  1. Checks environment and prerequisites"
+  echo "  2. Builds the Vue application and documentation"
+  echo "  3. Deploys to the gh-pages branch"
+  echo "  4. Pushes to GitHub Pages"
+  echo
+  echo -e "${YELLOW}Examples:${RESET}"
+  echo "  ./$(basename "$0")"
+  echo "  ./$(basename "$0") --help"
+}
+
 # Function to print colored messages
 print_message() {
   echo -e "${2}${1}${RESET}"
 }
+
+# Parse command line arguments
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      show_help
+      exit 0
+      ;;
+    *)
+      print_message "Unknown parameter: $1" "$RED"
+      show_help
+      exit 1
+      ;;
+  esac
+  shift
+done
 
 # Setup logging for debugging
 LOG_FILE="deploy.log"
