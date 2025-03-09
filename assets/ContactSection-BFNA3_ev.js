@@ -1,4 +1,4 @@
-import{u as m,o as r,c as e,b as t,t as a,e as s,p as l,d,F as h,r as u}from"./index-BRTq7Inv.js";import{c as p}from"./LanguageSwitcher-C2b6YQ78.js";/**
+import{u as m,o as r,c as e,b as t,t as a,e as s,p as l,d,F as h,r as u}from"./index-DM-u4OgW.js";import{c as p}from"./LanguageSwitcher-Dfu3c7ed.js";/**
  * @license lucide-vue-next v0.453.0 - ISC
  *
  * This source code is licensed under the ISC license.

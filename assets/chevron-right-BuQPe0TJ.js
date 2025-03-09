@@ -1,4 +1,4 @@
-import{c as o}from"./LanguageSwitcher-C2b6YQ78.js";/**
+import{c as o}from"./LanguageSwitcher-Dfu3c7ed.js";/**
  * @license lucide-vue-next v0.453.0 - ISC
  *
  * This source code is licensed under the ISC license.
