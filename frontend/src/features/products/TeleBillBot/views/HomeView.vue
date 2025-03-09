@@ -13,6 +13,10 @@ const activeSection = ref('hero')
 const featureName = 'TeleBillBot'
 const { t } = useFeatureTranslations('products/TeleBillBot')
 
+// Define sections and their offsets
+const sections = ['hero', 'features', 'pricing', 'faq']
+const sectionOffsets = ref({})
+
 // Use computed property for section titles to ensure they're reactive
 const sectionTitles = computed(() => ({
   'hero': t('title', 'TeleBillBot'),
@@ -21,35 +25,51 @@ const sectionTitles = computed(() => ({
   'faq': `${t('navigation.faq')} | ${t('title')}`
 }))
 
-// Update page title based on active section
-function updatePageTitle(section) {
-  document.title = sectionTitles.value[section] || 'TeleBillBot'
-}
-
-function handleScroll() {
+// Handle scroll event to update active section
+const handleScroll = () => {
   isScrolled.value = window.scrollY > 50
 
   // Determine active section
-  const sections = ['hero', 'features', 'pricing', 'faq']
+  const currentPosition = window.scrollY + window.innerHeight / 3
+
   for (const section of sections) {
     const element = document.getElementById(section)
     if (element) {
-      const rect = element.getBoundingClientRect()
-      // If the top of the element is near the top of the viewport (accounting for header)
-      if (rect.top <= 100 && rect.bottom >= 100) {
+      const offset = element.offsetTop
+      sectionOffsets.value[section] = offset
+
+      if (
+        currentPosition >= offset &&
+        currentPosition < offset + element.offsetHeight
+      ) {
         if (activeSection.value !== section) {
           activeSection.value = section
+          // Update URL hash when section changes
+          history.replaceState(null, '', `#${section}`)
+          // Update page title
           updatePageTitle(section)
         }
-        break
       }
     }
   }
 }
 
+// Update page title based on active section
+function updatePageTitle(section) {
+  document.title = sectionTitles.value[section] || 'TeleBillBot'
+}
+
+// Add this function to handle navigation from the TopBar component
+function navigateToSection(sectionId) {
+  // Update active section and title
+  activeSection.value = sectionId
+  updatePageTitle(sectionId)
+}
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
-  handleScroll()
+  handleScroll() // Call once to set initial state
+
   // Set initial page title
   updatePageTitle(activeSection.value)
 })
@@ -63,7 +83,8 @@ onUnmounted(() => {
   <div class="theme-provider">
     <div class="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
       <!-- Navigation -->
-      <TheTopBar :activeSection="activeSection" :isScrolled="isScrolled" :feature="featureName" />
+      <TheTopBar :activeSection="activeSection" :isScrolled="isScrolled" :feature="featureName"
+        @navigate="navigateToSection" />
 
       <!-- Hero Section -->
       <TheHero id="hero" />

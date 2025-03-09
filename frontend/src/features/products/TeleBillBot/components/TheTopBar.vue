@@ -11,20 +11,42 @@ const { t } = useI18n()
 const mobileMenuOpen = ref(false);
 const settingsOpen = ref(false);
 
+defineProps({
+  activeSection: {
+    type: String,
+    required: true,
+  },
+  isScrolled: {
+    type: Boolean,
+    required: true,
+  },
+  feature: {}
+});
+
 const navItems = computed(() => [
   { name: t('products/TeleBillBot.navigation.features'), id: 'features' },
   { name: t('products/TeleBillBot.navigation.pricing'), id: 'pricing' },
   { name: t('products/TeleBillBot.navigation.faq'), id: 'faq' }
 ]);
 
+// Define emits for parent component communication
+const emit = defineEmits(['navigate']);
+
 function scrollToSection(sectionId) {
+  // First, emit the navigate event so the parent can update state and URL
+  emit('navigate', sectionId);
+
+  // Then handle the actual scrolling
   const element = document.getElementById(sectionId);
   if (element) {
     window.scrollTo({
-      top: element.offsetTop - 55,
+      top: element.offsetTop - 60,
       behavior: 'smooth'
     });
   }
+
+  // Close mobile menu if open
+  mobileMenuOpen.value = false;
 }
 
 function toggleSettings() {
@@ -48,17 +70,7 @@ onUnmounted(() => {
   document.removeEventListener('click', closeSettingsPopover);
 });
 
-defineProps({
-  activeSection: {
-    type: String,
-    required: true,
-  },
-  isScrolled: {
-    type: Boolean,
-    required: true,
-  },
-  feature: {}
-});
+
 </script>
 
 <template>
