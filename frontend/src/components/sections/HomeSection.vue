@@ -260,7 +260,8 @@ onUnmounted(() => {
                     <div class="space-y-3 max-h-60 overflow-y-auto">
                       <a v-for="product in products" :key="product.name" :href="product.url" target="_blank"
                         rel="noopener noreferrer"
-                        class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                        class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                        @click="closeProducts">
                         <div class="flex items-start justify-between">
                           <h4 class="font-medium text-gray-900 dark:text-white">{{ t(product.name) }}</h4>
                           <ExternalLink class="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
@@ -314,7 +315,8 @@ onUnmounted(() => {
             <div class="space-y-1">
               <a v-for="product in products" :key="product.name" :href="product.url" target="_blank"
                 rel="noopener noreferrer"
-                class="block p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                class="block p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                @click="closeProducts">
                 <div class="flex items-start justify-between">
                   <h4 class="font-medium text-gray-900 dark:text-white text-lg">{{ t(product.name) }}</h4>
                   <ExternalLink class="h-5 w-5 text-gray-500 dark:text-gray-400 mt-1 flex-shrink-0" />
