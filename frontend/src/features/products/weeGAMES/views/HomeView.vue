@@ -26,8 +26,8 @@ const updateFavicon = () => {
   const link = document.querySelector("link[rel~='icon']") || document.createElement('link')
   link.type = 'image/x-icon'
   link.rel = 'icon'
-  link.href = '/faviconwee.png'
-  document.head.appendChild(link)
+  // link.href = '/faviconwee.png'
+  // document.head.appendChild(link)
 }
 
 // Update page title function
