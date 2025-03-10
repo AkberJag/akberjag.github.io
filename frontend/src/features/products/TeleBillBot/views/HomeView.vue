@@ -25,6 +25,19 @@ const sectionTitles = computed(() => ({
   'faq': `${t('navigation.faq')} | ${t('title')}`
 }))
 
+const updateFavicon = () => {
+  const link = document.querySelector("link[rel~='icon']") || document.createElement('link')
+  link.type = 'image/svg+xml'
+  link.rel = 'icon'
+
+  const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgb(37, 99, 235)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`
+
+  const dataUrl = `data:image/svg+xml;base64,${btoa(svgString)}`
+
+  link.href = dataUrl
+  document.head.appendChild(link)
+}
+
 // Handle scroll event to update active section
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50
@@ -72,6 +85,7 @@ onMounted(() => {
 
   // Set initial page title
   updatePageTitle(activeSection.value)
+  updateFavicon()
 })
 
 onUnmounted(() => {

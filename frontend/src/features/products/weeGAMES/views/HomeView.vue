@@ -22,6 +22,14 @@ const sectionTitles = {
   'contact': 'Contact Us | wee GAMES'
 }
 
+const updateFavicon = () => {
+  const link = document.querySelector("link[rel~='icon']") || document.createElement('link')
+  link.type = 'image/x-icon'
+  link.rel = 'icon'
+  link.href = '/faviconwee.png'
+  document.head.appendChild(link)
+}
+
 // Update page title function
 const updatePageTitle = (section) => {
   document.title = sectionTitles[section] || 'wee GAMES'
@@ -83,6 +91,7 @@ onMounted(() => {
   handleScroll()
   // Check for hash in URL on initial load
   setInitialSectionFromHash()
+  updateFavicon()
 })
 
 onUnmounted(() => {
