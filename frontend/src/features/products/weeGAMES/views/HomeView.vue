@@ -1,93 +1,114 @@
-  <script setup>
-  import { ref, onMounted, onUnmounted } from 'vue'
-  import TheHeader from '../components/layout/TheHeader.vue'
-  import HeroSection from '../components/sections/HeroSection.vue'
-  import GamesSection from '../components/sections/GamesSection.vue'
-  import ContactSection from '../components/sections/ContactSection.vue'
-  import AppFooter from '../components/layout/TheFooter.vue'
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import TheHeader from '../components/layout/TheHeader.vue'
+import HeroSection from '../components/sections/HeroSection.vue'
+import GamesSection from '../components/sections/GamesSection.vue'
+import ContactSection from '../components/sections/ContactSection.vue'
+import AppFooter from '../components/layout/TheFooter.vue'
 
-  // State for mobile menu
-  const mobileMenuOpen = ref(false)
-  // State for scroll position
-  const scrolled = ref(false)
-  // State for active section
-  const activeSection = ref('home')
-  const sections = ['home', 'games', 'contact']
-  const sectionOffsets = ref({})
+// State for mobile menu
+const mobileMenuOpen = ref(false)
+// State for scroll position
+const scrolled = ref(false)
+// State for active section
+const activeSection = ref('home')
+const sections = ['home', 'games', 'contact']
+const sectionOffsets = ref({})
 
-  // Handle scroll event
-  const handleScroll = () => {
-    scrolled.value = window.scrollY > 50
+// Section titles mapping
+const sectionTitles = {
+  'home': 'Home | wee GAMES',
+  'games': 'Our Games | wee GAMES',
+  'contact': 'Contact Us | wee GAMES'
+}
 
-    // Determine active section
-    const currentPosition = window.scrollY + window.innerHeight / 3
-    for (const section of sections) {
-      const element = document.getElementById(section)
-      if (element) {
-        const offset = element.offsetTop
-        sectionOffsets.value[section] = offset
-        if (
-          currentPosition >= offset &&
-          currentPosition < offset + element.offsetHeight
-        ) {
-          if (activeSection.value !== section) {
-            activeSection.value = section
-            // Update URL hash when section changes
-            history.replaceState(null, '', `#${section}`)
-          }
+// Update page title function
+const updatePageTitle = (section) => {
+  document.title = sectionTitles[section] || 'wee GAMES'
+}
+
+// Handle scroll event
+const handleScroll = () => {
+  scrolled.value = window.scrollY > 50
+
+  // Determine active section
+  const currentPosition = window.scrollY + window.innerHeight / 3
+  for (const section of sections) {
+    const element = document.getElementById(section)
+    if (element) {
+      const offset = element.offsetTop
+      sectionOffsets.value[section] = offset
+      if (
+        currentPosition >= offset &&
+        currentPosition < offset + element.offsetHeight
+      ) {
+        if (activeSection.value !== section) {
+          activeSection.value = section
+          // Update URL hash when section changes
+          history.replaceState(null, '', `#${section}`)
+          // Update page title
+          updatePageTitle(section)
         }
       }
     }
   }
+}
 
-  // Update active section method called from TheHeader
-  const updateActiveSection = section => {
-    activeSection.value = section
-    // URL hash will be updated by the scrollToSection method in TheHeader
+// Update active section method called from TheHeader
+const updateActiveSection = section => {
+  activeSection.value = section
+  // Update page title
+  updatePageTitle(section)
+  // URL hash will be updated by the scrollToSection method in TheHeader
+}
+
+// Check URL hash on initial load
+const setInitialSectionFromHash = () => {
+  const hash = window.location.hash
+  if (hash && sections.includes(hash.substring(1))) {
+    activeSection.value = hash.substring(1)
+    // Update page title for initial section
+    updatePageTitle(hash.substring(1))
+    // Let the browser's default scroll behavior work
+  } else {
+    // Set default page title if no hash
+    updatePageTitle('home')
   }
+}
 
-  // Check URL hash on initial load
-  const setInitialSectionFromHash = () => {
-    const hash = window.location.hash
-    if (hash && sections.includes(hash.substring(1))) {
-      activeSection.value = hash.substring(1)
-      // Let the browser's default scroll behavior work
-    }
-  }
+// Add and remove scroll event listener
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+  // Initial calculation of section positions
+  handleScroll()
+  // Check for hash in URL on initial load
+  setInitialSectionFromHash()
+})
 
-  // Add and remove scroll event listener
-  onMounted(() => {
-    window.addEventListener('scroll', handleScroll)
-    // Initial calculation of section positions
-    handleScroll()
-    // Check for hash in URL on initial load
-    setInitialSectionFromHash()
-  })
-
-  onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll)
-  })
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
-  <template>
-    <div class="min-h-screen bg-white text-gray-800 font-game">
-      <!-- Navigation Bar -->
-      <TheHeader :active-section="activeSection" :scrolled="scrolled" :mobile-menu-open="mobileMenuOpen"
-        @toggle-menu="mobileMenuOpen = !mobileMenuOpen" @update-active-section="updateActiveSection" />
+<template>
+  <div class="min-h-screen bg-white text-gray-800 font-game">
+    <!-- Navigation Bar -->
+    <TheHeader :active-section="activeSection" :scrolled="scrolled" :mobile-menu-open="mobileMenuOpen"
+      @toggle-menu="mobileMenuOpen = !mobileMenuOpen" @update-active-section="updateActiveSection" />
 
-      <!-- Hero Section -->
-      <HeroSection />
+    <!-- Hero Section -->
+    <HeroSection />
 
-      <!-- Games Section -->
-      <GamesSection />
+    <!-- Games Section -->
+    <GamesSection />
 
-      <!-- Contact Section -->
-      <ContactSection />
+    <!-- Contact Section -->
+    <ContactSection />
 
-      <!-- Footer -->
-      <AppFooter />
-    </div>
-  </template>
+    <!-- Footer -->
+    <AppFooter />
+  </div>
+</template>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
