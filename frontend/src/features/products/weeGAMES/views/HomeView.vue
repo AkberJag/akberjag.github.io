@@ -5,6 +5,8 @@ import HeroSection from '../components/sections/HeroSection.vue'
 import GamesSection from '../components/sections/GamesSection.vue'
 import ContactSection from '../components/sections/ContactSection.vue'
 import AppFooter from '../components/layout/TheFooter.vue'
+// Import favicon
+import faviconImage from '/faviconwee.png'
 
 // State for mobile menu
 const mobileMenuOpen = ref(false)
@@ -14,7 +16,6 @@ const scrolled = ref(false)
 const activeSection = ref('home')
 const sections = ['home', 'games', 'contact']
 const sectionOffsets = ref({})
-
 // Section titles mapping
 const sectionTitles = {
   'home': 'Home | wee GAMES',
@@ -26,8 +27,8 @@ const updateFavicon = () => {
   const link = document.querySelector("link[rel~='icon']") || document.createElement('link')
   link.type = 'image/x-icon'
   link.rel = 'icon'
-  // link.href = '/faviconwee.png'
-  // document.head.appendChild(link)
+  link.href = faviconImage
+  document.head.appendChild(link)
 }
 
 // Update page title function
