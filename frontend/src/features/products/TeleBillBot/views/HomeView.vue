@@ -1,25 +1,26 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import TheTopBar from '../components/TheTopBar.vue'
-import TheHero from '../components/sections/TheHero.vue'
-import { useFeatureTranslations } from '@/composables/useI18n'
+import TheHeader from '../components/layout/TheHeader.vue'
+
+import TheHeroSection from '../components/sections/TheHero.vue'
 import TheFeatures from '../components/sections/TheFeatures.vue'
 import ThePricing from '../components/sections/ThePricing.vue'
 import TheFAQ from '../components/sections/TheFAQ.vue'
 import TheCTA from '../components/sections/TheCTA.vue'
 
-const isScrolled = ref(false)
-const activeSection = ref('hero')
-const featureName = 'TeleBillBot'
-const { t } = useFeatureTranslations('products/TeleBillBot')
+import { useFeatureTranslations } from '@/composables/useI18n'
 
-// Define sections and their offsets
-const sections = ['hero', 'features', 'pricing', 'faq']
+const mobileMenuOpen = ref(false)
+const scrolled = ref(false)
+const activeSection = ref('home')
+const sections = ['home', 'features', 'pricing', 'faq']
 const sectionOffsets = ref({})
+
+const { t } = useFeatureTranslations('products/TeleBillBot')
 
 // Use computed property for section titles to ensure they're reactive
 const sectionTitles = computed(() => ({
-  'hero': t('title', 'TeleBillBot'),
+  'home': t('title', 'TeleBillBot'),
   'features': `${t('navigation.features')} | ${t('title')}`,
   'pricing': `${t('navigation.pricing')} | ${t('title')}`,
   'faq': `${t('navigation.faq')} | ${t('title')}`
@@ -38,54 +39,83 @@ const updateFavicon = () => {
   document.head.appendChild(link)
 }
 
-// Handle scroll event to update active section
+// Update page title function
+const updatePageTitle = (section) => {
+  document.title = sectionTitles.value[section] || 'Tele Bill Bot'
+}
+
+// Handle scroll event
 const handleScroll = () => {
-  isScrolled.value = window.scrollY > 50
+  scrolled.value = window.scrollY > 50
+
+  // Calculate section offsets
+  updateSectionOffsets()
 
   // Determine active section
   const currentPosition = window.scrollY + window.innerHeight / 3
 
+  // Find the current active section
+  let newActiveSection = sections[0] // Default to first section
+
+  for (let i = sections.length - 1; i >= 0; i--) {
+    const section = sections[i]
+    if (sectionOffsets.value[section] && currentPosition >= sectionOffsets.value[section]) {
+      newActiveSection = section
+      break
+    }
+  }
+
+  // Only update if section changed
+  if (activeSection.value !== newActiveSection) {
+    activeSection.value = newActiveSection
+    // Update URL hash when section changes
+    history.replaceState(null, '', `#${newActiveSection}`)
+    // Update page title
+    updatePageTitle(newActiveSection)
+  }
+}
+
+// Update the section offsets
+const updateSectionOffsets = () => {
   for (const section of sections) {
     const element = document.getElementById(section)
     if (element) {
-      const offset = element.offsetTop
-      sectionOffsets.value[section] = offset
-
-      if (
-        currentPosition >= offset &&
-        currentPosition < offset + element.offsetHeight
-      ) {
-        if (activeSection.value !== section) {
-          activeSection.value = section
-          // Update URL hash when section changes
-          history.replaceState(null, '', `#${section}`)
-          // Update page title
-          updatePageTitle(section)
-        }
-      }
+      sectionOffsets.value[section] = element.offsetTop
     }
   }
 }
 
-// Update page title based on active section
-function updatePageTitle(section) {
-  document.title = sectionTitles.value[section] || 'TeleBillBot'
+// Update active section (called from header)
+const updateActiveSection = (section) => {
+  activeSection.value = section
+  updatePageTitle(section)
 }
 
-// Add this function to handle navigation from the TopBar component
-function navigateToSection(sectionId) {
-  // Update active section and title
-  activeSection.value = sectionId
-  updatePageTitle(sectionId)
+// Check URL hash on initial load
+const setInitialSectionFromHash = () => {
+  const hash = window.location.hash.substring(1)
+  if (hash && sections.includes(hash)) {
+    activeSection.value = hash
+    // Update page title for initial section
+    updatePageTitle(hash)
+    // Let the browser's default scroll behavior work
+  } else {
+    // Set default page title if no hash
+    updatePageTitle('home')
+  }
 }
 
+// Add and remove scroll event listener
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
-  handleScroll() // Call once to set initial state
-
-  // Set initial page title
-  updatePageTitle(activeSection.value)
+  // Initial calculation of section positions
+  updateSectionOffsets()
+  // Check for hash in URL on initial load
+  setInitialSectionFromHash()
   updateFavicon()
+
+  // Initial scroll handler to set the correct active section
+  handleScroll()
 })
 
 onUnmounted(() => {
@@ -96,12 +126,12 @@ onUnmounted(() => {
 <template>
   <div class="theme-provider">
     <div class="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-      <!-- Navigation -->
-      <TheTopBar :activeSection="activeSection" :isScrolled="isScrolled" :feature="featureName"
-        @navigate="navigateToSection" />
+      <!-- Navigation Bar -->
+      <TheHeader :active-section="activeSection" :scrolled="scrolled" :mobile-menu-open="mobileMenuOpen"
+        @toggle-menu="mobileMenuOpen = !mobileMenuOpen" />
 
       <!-- Hero Section -->
-      <TheHero id="hero" />
+      <TheHeroSection id="home" />
 
       <!-- Features Section -->
       <TheFeatures id="features" />
@@ -114,9 +144,6 @@ onUnmounted(() => {
 
       <!-- CTA Section -->
       <TheCTA />
-
-      <!-- Footer -->
-      <footer class="bg-gray-900 text-white py-12"> </footer>
     </div>
   </div>
 </template>

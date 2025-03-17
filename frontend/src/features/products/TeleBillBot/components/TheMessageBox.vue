@@ -163,7 +163,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .message-enter-active,
 .message-leave-active {
   transition: opacity 0.5s, transform 0.5s;
