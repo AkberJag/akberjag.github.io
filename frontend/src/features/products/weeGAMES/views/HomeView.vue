@@ -63,14 +63,6 @@ const handleScroll = () => {
   }
 }
 
-// Update active section method called from TheHeader
-const updateActiveSection = section => {
-  activeSection.value = section
-  // Update page title
-  updatePageTitle(section)
-  // URL hash will be updated by the scrollToSection method in TheHeader
-}
-
 // Check URL hash on initial load
 const setInitialSectionFromHash = () => {
   const hash = window.location.hash
@@ -104,7 +96,7 @@ onUnmounted(() => {
   <div class="min-h-screen bg-white text-gray-800 font-game">
     <!-- Navigation Bar -->
     <TheHeader :active-section="activeSection" :scrolled="scrolled" :mobile-menu-open="mobileMenuOpen"
-      @toggle-menu="mobileMenuOpen = !mobileMenuOpen" @update-active-section="updateActiveSection" />
+      @toggle-menu="mobileMenuOpen = !mobileMenuOpen" />
 
     <!-- Hero Section -->
     <HeroSection />

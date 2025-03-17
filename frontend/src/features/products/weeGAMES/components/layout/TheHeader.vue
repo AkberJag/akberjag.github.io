@@ -16,7 +16,7 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['toggleMenu', 'updateActiveSection', 'startScrolling'])
+const emit = defineEmits(['toggleMenu', 'startScrolling'])
 
 const navItems = [
   { label: 'Home', href: '#home', section: 'home' },
