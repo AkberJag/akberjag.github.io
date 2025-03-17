@@ -20,7 +20,7 @@ const pricingPlans = [
   },
   {
     title: 'products/TeleBillBot.pricing.plans.threeYear.title',
-    price: '₹3,099',
+    price: '₹3,499',
     duration: 'products/TeleBillBot.pricing.plans.threeYear.duration',
     description: 'products/TeleBillBot.pricing.plans.threeYear.description',
     features: [
@@ -34,7 +34,7 @@ const pricingPlans = [
   },
   {
     title: 'products/TeleBillBot.pricing.plans.annual.title',
-    price: '₹3,999',
+    price: '₹4,499',
     duration: 'products/TeleBillBot.pricing.plans.annual.duration',
     description: 'products/TeleBillBot.pricing.plans.annual.description',
     features: [
